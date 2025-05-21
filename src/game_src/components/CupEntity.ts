@@ -186,7 +186,7 @@ export class CupEntity {
                     resolve(helmetMesh);
                 },
                 undefined,
-                (scene, message) => {
+                (message) => {
                     console.error("Error loading helmet model:", message);
                     // If loading fails, use the temporary mesh
                     resolve(tempMesh);
