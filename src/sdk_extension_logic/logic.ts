@@ -108,7 +108,7 @@ export class GameLogic extends BaseGameLogic<
     const upper_bound = this.state.number_of_cups - 1;
     const sequence: number[][] = [];
     for (let i = 0; i < 10; i++) {
-      let first_index = Math.floor(Math.random() * (upper_bound - lower_bound + 1)) + lower_bound;
+      const first_index = Math.floor(Math.random() * (upper_bound - lower_bound + 1)) + lower_bound;
       let second_index = Math.floor(Math.random() * (upper_bound - lower_bound + 1)) + lower_bound;
 
       while (first_index === second_index) {
@@ -130,14 +130,7 @@ export class GameLogic extends BaseGameLogic<
     return [sequence, this.state.starting_cup];
   }
 
-  private increaseDifficulty(): void {
-    // TODO: Implement this
-    // Increase the difficulty of the game
-    // Do based on the round number
-    
-  }
-  
-  public override handleMessage(
+    public override handleMessage(
     message: MessageType,
     payload: MessagePayloads[MessageType],
     sender?: PlayerState | null,
@@ -191,10 +184,7 @@ export class GameLogic extends BaseGameLogic<
   }
 
 
-  private startShuffleTimer(phase: string): void {
-  }
-
-  public cleanup(): void {
+    public cleanup(): void {
     this.isGameLoopRunning = false;
     if (this.choiceUpdateInterval) {
       clearInterval(this.choiceUpdateInterval);

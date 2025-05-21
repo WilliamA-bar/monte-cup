@@ -2,8 +2,10 @@ import { Vector3, HemisphericLight, Color3, Color4, Engine, KeyboardEventTypes, 
 import { SceneContainer } from '../../core/SceneContainer';
 import { PlayerChoiceEntity } from '../../components/PlayerChoiceEntity';
 import { Player } from '../../config/Player';
+import { BaseHostRoom } from '../../../sdk';
 import type { ClientRoom, HostRoom } from '../../../sdk_extension_logic/client';
-import type { GameState, PlayerState } from '../../../sdk_extension_logic/schema';
+import type { GameState, PlayerState, MessageType, MessagePayloads } from '../../../sdk_extension_logic/schema';
+
 export class ChoiceEntityDebugScene extends SceneContainer {
     private playerChoice: PlayerChoiceEntity;
     private debugPlayers: Player[] = [
@@ -16,7 +18,7 @@ export class ChoiceEntityDebugScene extends SceneContainer {
     private currentPlayerIndex: number = 0;
 
     constructor(engine: Engine, canvas: HTMLCanvasElement, room: ClientRoom | HostRoom) {
-        super(engine, canvas, room);
+        super(engine, canvas, room as unknown as BaseHostRoom<GameState<PlayerState>, PlayerState, MessageType, MessagePayloads>);
         this.playerChoice = new PlayerChoiceEntity(this.scene, new Vector3(0, 0, 0));
     }
 
@@ -60,14 +62,44 @@ export class ChoiceEntityDebugScene extends SceneContainer {
                 switch (kbInfo.event.key) {
                     case 'a':
                         if (this.currentPlayerIndex < this.debugPlayers.length) {
-                            this.playerChoice.addPlayer(this.debugPlayers[this.currentPlayerIndex]);
+                            const player = this.debugPlayers[this.currentPlayerIndex];
+                            // Convert Player to PlayerState
+                            const playerState = {
+                                session_id: `player-${this.currentPlayerIndex}`,
+                                user_id: `player-${this.currentPlayerIndex}`,
+                                username: player.name,
+                                avatar_url: null,
+                                color: player.color.toHexString(),
+                                created_at: new Date().toISOString(),
+                                is_active: true,
+                                isEliminated: false,
+                                eliminatedAtRound: -1,
+                                selectedCup: 0,
+                                current_emojis: {}
+                            } as PlayerState;
+                            this.playerChoice.addPlayer(playerState);
                             this.currentPlayerIndex++;
                         }
                         break;
                     case 's':
                         if (this.currentPlayerIndex > 0) {
                             this.currentPlayerIndex--;
-                            this.playerChoice.removePlayer(this.debugPlayers[this.currentPlayerIndex]);
+                            const player = this.debugPlayers[this.currentPlayerIndex];
+                            // Convert Player to PlayerState
+                            const playerState = {
+                                session_id: `player-${this.currentPlayerIndex}`,
+                                user_id: `player-${this.currentPlayerIndex}`,
+                                username: player.name,
+                                avatar_url: null,
+                                color: player.color.toHexString(),
+                                created_at: new Date().toISOString(),
+                                is_active: true,
+                                isEliminated: false,
+                                eliminatedAtRound: -1,
+                                selectedCup: 0,
+                                current_emojis: {}
+                            } as PlayerState;
+                            this.playerChoice.removePlayer(playerState);
                         }
                         break;
                 }

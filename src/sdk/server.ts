@@ -50,7 +50,7 @@ export class ServerRoom<T extends BaseGameState<P>, P extends BasePlayerState> {
       Date.now() + (initialState?.waiting_room_interval || 0),
     ).toISOString();
     if (initialState?.timeout_interval) {
-      const gameEndsBy = new Date(
+      gameEndsBy = new Date(
         new Date(gameStartsBy).getTime() +
           (initialState?.timeout_interval || 0),
       ).toISOString();
@@ -73,10 +73,14 @@ export class ServerRoom<T extends BaseGameState<P>, P extends BasePlayerState> {
 
       // Safety methods for this shared server approach that should be used to kill room specific game-clock intervals when other client driven conditions accelerate their progress
       if (this.state.game_started_at) {
-        this.waitingRoomInterval && clearInterval(this.waitingRoomInterval);
+        if (this.waitingRoomInterval) {
+          clearInterval(this.waitingRoomInterval);
+        }
       }
       if (this.state.game_ended_at) {
-        this.gameTimeoutInterval && clearInterval(this.gameTimeoutInterval);
+        if (this.gameTimeoutInterval) {
+          clearInterval(this.gameTimeoutInterval);
+        }
       }
     });
 
@@ -105,7 +109,9 @@ export class ServerRoom<T extends BaseGameState<P>, P extends BasePlayerState> {
   }
 
   private startGame(): void {
-    this.waitingRoomInterval && clearInterval(this.waitingRoomInterval);
+    if (this.waitingRoomInterval) {
+      clearInterval(this.waitingRoomInterval);
+    }
     if (
       this.state.min_players &&
       Object.keys(this.state.players).length < this.state.min_players
@@ -139,7 +145,9 @@ export class ServerRoom<T extends BaseGameState<P>, P extends BasePlayerState> {
   }
 
   private endGame(timedOut: boolean): void {
-    this.gameTimeoutInterval && clearInterval(this.gameTimeoutInterval);
+    if (this.gameTimeoutInterval) {
+      clearInterval(this.gameTimeoutInterval);
+    }
     console.log("Ending game");
     this.adapter.updateState({
       ...this.state,

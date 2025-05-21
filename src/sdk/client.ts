@@ -302,4 +302,9 @@ export class HostRoom<
     );
     this.serverRoom = serverRoom;
   }
+  
+  // Get the server room code for display purposes
+  public getServerRoomCode(): string {
+    return this.serverRoom.code;
+  }
 }

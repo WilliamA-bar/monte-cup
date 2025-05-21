@@ -154,7 +154,7 @@ export class GameStateContainer {
     }
 
     // Modify phaseCompleted to handle the choice updates
-    public async phaseCompleted(phase: RoundPhases): Promise<void> {
+    public async phaseCompleted(): Promise<void> {
         this._round_phase = this._round_phase + 1;
         
         // Start random choice updates when entering guessing phase

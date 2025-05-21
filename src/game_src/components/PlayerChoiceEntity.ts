@@ -9,6 +9,7 @@ export class PlayerChoiceEntity {
     private INITIAL_POSITION_OFFSET: Vector3;
     private DECISION_POSITION_OFFSET: Vector3;
     private decision_meshes: Mesh[];
+    // Tracks whether the choice entity is currently enabled
     private enabled: boolean;
 
     constructor(scene: Scene, position: Vector3) {
@@ -88,6 +89,9 @@ export class PlayerChoiceEntity {
         this.decision_meshes.pop();
         
     }
-    
 
+    // Getter for the enabled state
+    public isEnabled(): boolean {
+        return this.enabled;
+    }
 }

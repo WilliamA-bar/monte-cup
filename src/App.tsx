@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { BabylonGameController } from "./game_src/core/BabylonGameController";
 import type { IGameController } from "./game_src/core/IGameController";
 import "./App.css";
@@ -32,7 +32,9 @@ export default function App() {
             gameRef.current = new BabylonGameController(canvasRef.current, roomRef.current);
             
             // Start the game logic and then initialize the game
-            (roomRef.current as any).gameLogic.startGame();
+            if (roomRef.current) {
+                (roomRef.current as unknown as {gameLogic: {startGame: () => void}}).gameLogic.startGame();
+            }
             gameRef.current?.start().catch(console.error);
         }
 

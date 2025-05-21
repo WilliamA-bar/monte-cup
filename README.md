@@ -52,3 +52,42 @@ export default tseslint.config({
   },
 })
 ```
+
+# Monte Cup
+
+A 3-cup Monte cup shuffle game built with React, Babylon.js, and Supabase.
+
+## Development
+
+To run the development server:
+
+```bash
+npm install
+npm run dev
+```
+
+## Deployment
+
+The application is automatically deployed to GitHub Pages when changes are pushed to the main branch.
+
+### Manual Deployment
+
+To manually deploy the application to GitHub Pages:
+
+```bash
+npm run deploy
+```
+
+## GitHub Pages Setup
+
+1. In your repository settings, enable GitHub Pages
+2. Set the source to "GitHub Actions"
+3. The site will be deployed to: https://yourusername.github.io/monte-cup/
+
+## Tech Stack
+
+- React
+- Babylon.js for 3D graphics
+- Supabase for backend
+- TypeScript
+- Vite for bundling

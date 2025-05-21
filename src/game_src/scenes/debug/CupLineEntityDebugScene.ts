@@ -3,7 +3,8 @@ import { CupLineEntity } from "../../components/CupLineEntity";
 import { SceneContainer } from "../../core/SceneContainer";
 import { AdvancedDynamicTexture, StackPanel, InputText, Button, TextBlock } from "@babylonjs/gui";
 import { KeyboardEventTypes } from "@babylonjs/core";
-import { GameStateContainer } from "../../config/GameStateContainer";
+import { BaseHostRoom } from "../../../sdk";
+import { GameState, MessagePayloads, MessageType, PlayerState } from "../../../sdk_extension_logic/schema";
 
 export class CupLineEntityDebugScene extends SceneContainer {
     private cupLine!: CupLineEntity;
@@ -16,7 +17,25 @@ export class CupLineEntityDebugScene extends SceneContainer {
     private isOperationInProgress: boolean = false;
 
     constructor(engine: Engine, canvas: HTMLCanvasElement) {
-        super(engine, canvas);
+        // Create a mock room for debug purposes
+        const mockRoom = {
+            state: {
+                number_of_cups: 3,
+                shuffle_duration: 5,
+                shuffle_pace_base: 0.4,
+                shuffle_pace_variance: 0.1,
+                starting_cup: 0,
+                shuffle_sequence: [],
+                current_shuffle_parameters: {
+                    shuffle_pace_base: 0.4,
+                    shuffle_pace_variance: 0.1
+                },
+                players: {},
+            } as unknown as GameState<PlayerState>,
+            roomId: "debug-room",
+        } as unknown as BaseHostRoom<GameState<PlayerState>, PlayerState, MessageType, MessagePayloads>;
+        
+        super(engine, canvas, mockRoom);
     }
 
     public async initialize(): Promise<void> {
@@ -46,7 +65,7 @@ export class CupLineEntityDebugScene extends SceneContainer {
         // No environment setup needed for debug scene
     }
 
-    protected onGameStateChanged(state: GameStateContainer): void {
+    protected onGameStateChanged(state: GameState<PlayerState>): void {
         console.log("Game state changed:", state);
     }
 
@@ -135,10 +154,7 @@ export class CupLineEntityDebugScene extends SceneContainer {
         this.cupLine = new CupLineEntity(
             this.scene,
             new Vector3(0, 0, 0),
-            this.parameters.numberOfCups,
-            this.parameters.shuffleDuration,
-            this.parameters.shufflePaceBase,
-            this.parameters.shufflePaceVariance
+            this.room
         );
         this.cupLine.initialize();
     }
@@ -181,7 +197,7 @@ export class CupLineEntityDebugScene extends SceneContainer {
                         }
                         this.isOperationInProgress = true;
                         console.log("Starting guessing phase...");
-                        this.cupLine.guessingPhase(this.state_container).then(() => {
+                        this.cupLine.guessingPhase(this.room).then(() => {
                             console.log("Guessing phase complete");
                             this.isOperationInProgress = false;
                         }).catch(error => {

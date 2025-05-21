@@ -22,6 +22,7 @@ interface IGameLogic<
   ): P;
   onPlayerLeave(session_id: string): void;
   onSendEmoji(player: P, emoji: string): void;
+  setState(state: T): void;
   cleanup(): void;
 }
 
