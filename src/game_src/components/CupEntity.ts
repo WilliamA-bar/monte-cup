@@ -13,6 +13,7 @@ export class CupEntity {
     private isOpenable: boolean;
     private id: number;
     private position: Vector3;
+    private name: string;
 
     /**
      * Creates a new cup entity.
@@ -27,11 +28,12 @@ export class CupEntity {
         this.id = id;
         this.position = position;
         this.isOpenable = false;
+        this.name = name;
     }
 
     public async initialize(): Promise<void> {
-        this.mesh = await this.createCupMesh(this.mesh?.name || 'cup');
-        this.couponMesh = this.createCouponMesh(this.mesh.name + '_coupon');
+        this.mesh = await this.createCupMesh(this.name);
+        this.couponMesh = this.createCouponMesh(this.name + '_coupon');
         
         // Set initial positions
         this.mesh.position = this.position;
