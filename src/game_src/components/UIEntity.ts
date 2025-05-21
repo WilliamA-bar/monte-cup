@@ -19,7 +19,7 @@ export class UIEntity {
     private timerInterval: NodeJS.Timeout | null = null;
 
     private readonly gameMessages = {
-        firstRoundWelcome: "Welcome to Three Cup Hockey! Keep your eyes on the helmet with the puck!",
+        firstRoundWelcome: "Three Cup Hockey: Keep your eyes on the helmet with the puck!",
         newRound: "ROUND",
         shuffling: "Shuffling...",
         pickCup: "Pick the helmet with the puck!",
