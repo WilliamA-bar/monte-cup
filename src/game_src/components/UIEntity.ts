@@ -21,7 +21,7 @@ export class UIEntity {
     private readonly gameMessages = {
         firstRoundWelcome: "Welcome to Three Cup Hockey! Keep your eyes on the helmet with the puck!",
         newRound: "ROUND",
-        shuffling: "Shuffling cups...",
+        shuffling: "Shuffling...",
         pickCup: "Pick the helmet with the puck!",
         reveal: "Here was the puck!",
         gameOver: "Game Over! Thanks for playing!"
@@ -57,7 +57,7 @@ export class UIEntity {
         const text = new TextBlock();
         text.text = "";
         text.color = "#006847"; // Dallas Stars green
-        text.fontSize = 68;
+        text.fontSize = 58;
         text.height = "80px";
         text.width = "150px";
         text.fontFamily = "Impact, 'Arial Black', sans-serif";
@@ -98,7 +98,7 @@ export class UIEntity {
         const text = new TextBlock();
         text.text = "Round 1";
         text.color = "#006847"; // Dallas Stars green
-        text.fontSize = 56;
+        text.fontSize = 46;
         text.height = "80px";
         text.fontFamily = "Impact, 'Arial Black', sans-serif";
         text.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
@@ -182,6 +182,7 @@ export class UIEntity {
                 this.dynamicText.text = this.gameMessages.reveal;
                 break;
             case GAME_CONSTANTS.PHASES.GAME_OVER:
+                this.roundText.dispose();
                 this.dynamicText.text = this.gameMessages.gameOver;
                 break;
         }
