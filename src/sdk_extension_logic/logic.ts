@@ -56,7 +56,7 @@ export class GameLogic extends BaseGameLogic<
       this.state.game_phase = GAME_CONSTANTS.PHASES.DISPLAY_COUPON;
       await this.adapter.updateState(this.state);
       console.log("[GameLogic] Displaying coupon");
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise(resolve => setTimeout(resolve, 4000));
 
       // Shuffle phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.SHUFFLE_CUPS;
@@ -64,7 +64,7 @@ export class GameLogic extends BaseGameLogic<
       this.state.correct_cup_index = this.state.starting_cup; // Keep both in sync during transition
       await this.adapter.updateState(this.state);
       console.log("[GameLogic] Shuffling cups");
-      await new Promise(resolve => setTimeout(resolve, 8000));
+      await new Promise(resolve => setTimeout(resolve, 7000));
 
       // Guessing phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.GUESSING_PHASE;
@@ -76,13 +76,13 @@ export class GameLogic extends BaseGameLogic<
       // Check player inputs against the correct cup
       this.validateGuesses(this.state.starting_cup);
       await this.adapter.updateState(this.state);
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise(resolve => setTimeout(resolve, 4000));
 
       // End round phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.END_ROUND;
       this.state.round++;
       await this.adapter.updateState(this.state);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
     
     // Game over
