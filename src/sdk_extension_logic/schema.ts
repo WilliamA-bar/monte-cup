@@ -58,7 +58,7 @@ export const GAME_CONSTANTS = {
     NUMBER_OF_CUPS: 3,
     SHUFFLE_DURATION: 10, // seconds
     SHUFFLE_PACE_BASE: 0.35, // seconds
-    SHUFFLE_PACE_VARIANCE: 0.2, // seconds
+    SHUFFLE_PACE_VARIANCE: 0.1, // seconds
   },
   RAMP_UP_AFTER_THIS_MANY_ROUNDS: 2,
   RAMP_UP_PARAMETER_INCREASES: {

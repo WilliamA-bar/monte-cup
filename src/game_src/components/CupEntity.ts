@@ -1,4 +1,4 @@
-import { Mesh, Scene, MeshBuilder, Vector3, StandardMaterial, Color3, Animation, ActionManager, ExecuteCodeAction } from '@babylonjs/core';
+import { Mesh, Scene, MeshBuilder, Vector3, StandardMaterial, Color3, Animation, ActionManager, ExecuteCodeAction, QuadraticEase, EasingFunction } from '@babylonjs/core';
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 import '@babylonjs/loaders/glTF';
 /**
@@ -117,7 +117,10 @@ export class CupEntity {
                     return;
                 }
 
+                // Calculate eased time using quadratic ease out
                 const t = elapsedTime / duration;
+                
+                // Calculate position with eased timing
                 const linearPos = Vector3.Lerp(startPosition, endPosition, t);
                 const sideOffset = Math.sin(Math.PI * t) * radius;
                 const newPos = linearPos.add(perpendicular.scale(sideOffset));
@@ -138,7 +141,7 @@ export class CupEntity {
         }
 
         console.log("Should show coupon:", this.isCorrect);
-        await this.lift(2.5);
+        await this.lift(3);
         await new Promise<void>(resolve => {
             let timeElapsed = 0;
             const observer = this.scene.onBeforeRenderObservable.add(() => {
@@ -149,7 +152,7 @@ export class CupEntity {
                 }
             });
         });
-        await this.lift(-2.5);
+        await this.lift(-3);
     }
 
     /**
@@ -279,6 +282,9 @@ export class CupEntity {
                 { frame: frameRate * duration, value: targetPosition }
             ];
             animation.setKeys(keyFrames);
+            const quadraticEase = new QuadraticEase();
+            quadraticEase.setEasingMode(EasingFunction.EASINGMODE_EASEOUT); // This will make it start fast and slow down
+            animation.setEasingFunction(quadraticEase);
             this.mesh.animations = [animation];
 
             // For coupon, only animate X and Z, keep Y at ground level
@@ -310,6 +316,7 @@ export class CupEntity {
                     }
                 ];
                 couponAnimation.setKeys(couponKeyFrames);
+                couponAnimation.setEasingFunction(quadraticEase); // Use the same easing for the coupon
                 this.couponMesh.animations = [couponAnimation];
             }
 

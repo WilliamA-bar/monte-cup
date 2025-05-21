@@ -29,7 +29,7 @@ export class CupLineEntity {
         this.shuffle_duration = room.state.shuffle_duration;
         this.shuffle_pace_base = room.state.shuffle_pace_base;
         this.shuffle_pace_variance = room.state.shuffle_pace_variance;
-        this.line_length = 11;
+        this.line_length = 9;
         this.start_position = new Vector3(-this.line_length / 2, 0.75, 0);
         this.cups = [];
         this.choice_entities = [];
