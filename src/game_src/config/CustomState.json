@@ -1,0 +1,76 @@
+{
+    "cup_line_parameters": {
+        "numberOfCups": 3,
+        "shuffleDuration": 5,
+        "shufflePaceBase": 0.4,
+        "shufflePaceVariance": 0.1
+    },
+    "decision_phase_duration": 10,
+    "round_number": 1,
+    "players": [
+        {
+            "name": "Player 1",
+            "color": {
+                "r": 1,
+                "g": 0,
+                "b": 0
+            },
+            "stats": {
+                "correct_guesses": 0,
+                "total_guesses": 0,
+                "wins": 0,
+                "losses": 0
+            },
+            "isEliminated": false,
+            "selectedCup": 1
+        },
+        {
+            "name": "Player 3",
+            "color": {
+                "r": 1,
+                "g": 2,
+                "b": 0
+            },
+            "stats": {
+                "correct_guesses": 0,
+                "total_guesses": 0,
+                "wins": 0,
+                "losses": 0
+            },
+            "isEliminated": false,
+            "selectedCup": 1
+        },
+        {
+            "name": "Player 2",
+            "color": {
+                "r": 0,
+                "g": 0,
+                "b": 1
+            },
+            "stats": {
+                "correct_guesses": 0,
+                "total_guesses": 0,
+                "wins": 0,
+                "losses": 0
+            },
+            "isEliminated": false,
+            "selectedCup": 1
+        },
+        {
+            "name": "Player 4",
+            "color": {
+                "r": 0,
+                "g": 1,
+                "b": 0
+            },
+            "stats": {
+                "correct_guesses": 0,
+                "total_guesses": 0,
+                "wins": 0,
+                "losses": 0
+            },
+            "isEliminated": false,
+            "selectedCup": 1
+        }
+    ]
+}
