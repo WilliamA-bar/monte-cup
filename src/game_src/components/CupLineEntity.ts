@@ -44,9 +44,9 @@ export class CupLineEntity {
             const position = this.start_position.clone().add(new Vector3(cup_spacing * i, 0, 0));
             const cup = new CupEntity(this.scene, position, 'cup' + i, false, i);
             this.cups.push(cup);
-            const choice_entity = new PlayerChoiceEntity(this.scene, position);
-            choice_entity.enable();
-            this.choice_entities.push(choice_entity);
+            //const choice_entity = new PlayerChoiceEntity(this.scene, position);
+            // Don't enable choice entities by default
+            //this.choice_entities.push(choice_entity);
         }
     }
 
@@ -58,7 +58,7 @@ export class CupLineEntity {
     public async guessingPhase(room: BaseHostRoom<GameState<PlayerState>, PlayerState, MessageType, MessagePayloads>): Promise<void> {
         // Enable all choice entities
         for (let i = 0; i < this.number_of_cups; i++) {
-            this.choice_entities[i].enable();
+            //this.choice_entities[i].enable(); For the dallas stars demo, choice entities are not enabled
         }
 
         // Create a promise that resolves after 10 seconds

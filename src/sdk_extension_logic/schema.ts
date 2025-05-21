@@ -41,21 +41,6 @@ export type MessageType = BaseMessageType | "VOTE" | "PHASE_COMPLETE" | "SIMULAT
 export interface MessagePayloads extends BaseMessagePayloads {
   VOTE: number;
   PHASE_COMPLETE: undefined;
-  SIMULATION_OUTCOME: {
-    winner: string;
-    finalState: {
-      robot1Health: number;
-      robot2Health: number;
-      totalDamageDealt: number;
-      roundDuration: number;
-      // ... other relevant stats
-    };
-    events: Array<{
-      timestamp: number;
-      type: string;
-      data: any;
-    }>;
-  };
 }
 
 // Game Constants
@@ -72,8 +57,8 @@ export const GAME_CONSTANTS = {
   ROUND_ONE_SHUFFLE_PARAMETERS: {
     NUMBER_OF_CUPS: 3,
     SHUFFLE_DURATION: 10, // seconds
-    SHUFFLE_PACE_BASE: 0.5, // seconds
-    SHUFFLE_PACE_VARIANCE: 0.3, // seconds
+    SHUFFLE_PACE_BASE: 0.35, // seconds
+    SHUFFLE_PACE_VARIANCE: 0.2, // seconds
   },
   RAMP_UP_AFTER_THIS_MANY_ROUNDS: 2,
   RAMP_UP_PARAMETER_INCREASES: {

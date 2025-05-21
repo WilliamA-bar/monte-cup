@@ -36,14 +36,14 @@ export class PlayerChoiceEntity {
 
     // Make meshes visible
     public enable(): void {
-        this.enabled = true;
-        this.decision_meshes.forEach(mesh => mesh.setEnabled(true));
+        this.enabled = false;
+        this.decision_meshes.forEach(mesh => mesh.setEnabled(this.enabled));
     }
 
     // Make meshes invisible
     public disable(): void {
         this.enabled = false;
-        this.decision_meshes.forEach(mesh => mesh.setEnabled(false));
+        this.decision_meshes.forEach(mesh => mesh.setEnabled(this.enabled));
     }
     
     public addPlayer(player: PlayerState): void {

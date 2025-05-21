@@ -63,7 +63,7 @@ export class GameLogic extends BaseGameLogic<
       this.state.correct_cup_index = this.state.starting_cup; // Keep both in sync during transition
       await this.adapter.updateState(this.state);
       console.log("[GameLogic] Shuffling cups");
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      await new Promise(resolve => setTimeout(resolve, 9000));
 
       // Guessing phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.GUESSING_PHASE;
@@ -107,7 +107,7 @@ export class GameLogic extends BaseGameLogic<
     const lower_bound = 0;
     const upper_bound = this.state.number_of_cups - 1;
     const sequence: number[][] = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 13; i++) {
       const first_index = Math.floor(Math.random() * (upper_bound - lower_bound + 1)) + lower_bound;
       let second_index = Math.floor(Math.random() * (upper_bound - lower_bound + 1)) + lower_bound;
 

@@ -1,4 +1,4 @@
-import { Vector3, HemisphericLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera } from '@babylonjs/core';
+import { Vector3, HemisphericLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera, Texture } from '@babylonjs/core';
 import { SceneContainer } from '../core/SceneContainer';
 import { CupLineEntity } from '../components/CupLineEntity';
 import { UIEntity } from '../components/UIEntity';
@@ -109,28 +109,34 @@ export class CupShuffleScene extends SceneContainer {
         }, this.scene);
 
         const groundMaterial = new StandardMaterial('groundMaterial', this.scene);
-        groundMaterial.diffuseColor = new Color3(0.8, 0.5, 0.3);
+        const woodTexture = new Texture("./textures/seamless-wood.avif", this.scene);
+        woodTexture.uScale = 1; // Adjust these values to control texture tiling
+        woodTexture.vScale = 1;
+        groundMaterial.diffuseTexture = woodTexture;
+        groundMaterial.specularColor = new Color3(0.1, 0.1, 0.1);
+        groundMaterial.roughness = 0.3;
         ground.material = groundMaterial;
     }
 
     protected setupLights(): void {
         const ambientLight = new HemisphericLight('ambientLight', new Vector3(0, 1, 0), this.scene);
-        ambientLight.intensity = 0.2;
-        ambientLight.groundColor = new Color3(0.2, 0.2, 0.2);
+        ambientLight.intensity = 0.5;
+        ambientLight.groundColor = new Color3(0.1, 0.05, 0.05);
+        ambientLight.diffuse = new Color3(0.8, 0.7, 0.6);
 
         const spotLight = new PointLight('spotLight', new Vector3(0, 8, 0), this.scene);
-        spotLight.intensity = 0.8;
-        spotLight.diffuse = new Color3(1, 0.95, 0.8);
-        spotLight.specular = new Color3(1, 0.95, 0.8);
+        spotLight.intensity = 0.7;
+        spotLight.diffuse = new Color3(1, 0.9, 0.7);
+        spotLight.specular = new Color3(1, 0.9, 0.7);
         spotLight.radius = 0.1;
-        spotLight.range = 15;
+        spotLight.range = 20;
 
         const frontLight = new PointLight('frontLight', new Vector3(0, 0, 10), this.scene);
         frontLight.intensity = 0.5;
-        frontLight.diffuse = new Color3(1, 0.95, 0.8);
-        frontLight.specular = new Color3(1, 0.95, 0.8);
+        frontLight.diffuse = new Color3(0.9, 0.8, 0.6);
+        frontLight.specular = new Color3(0.9, 0.8, 0.6);
         frontLight.radius = 0.1;
-        frontLight.range = 15;
+        frontLight.range = 20;
     }
 
     protected onGameStateChanged(state: GameState<PlayerState>): void {

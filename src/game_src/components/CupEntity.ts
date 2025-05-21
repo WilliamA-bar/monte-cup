@@ -1,5 +1,6 @@
 import { Mesh, Scene, MeshBuilder, Vector3, StandardMaterial, Color3, Animation, ActionManager, ExecuteCodeAction } from '@babylonjs/core';
-
+import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
+import '@babylonjs/loaders/glTF';
 /**
  * Represents a cup in the cup shuffle game.
  * Handles the cup's mesh, animations, and interactions.
@@ -158,29 +159,50 @@ export class CupEntity {
      * Creates the cup's mesh.
      */
     private createCupMesh(name: string): Mesh {
-        return MeshBuilder.CreateCylinder(name, {
+        const tempMesh = MeshBuilder.CreateCylinder(name, {
             height: 1.5,
             diameter: 1.5,
             tessellation: 20
         }, this.scene);
+
+        console.log("Attempting to load helmet model...");
+        SceneLoader.ImportMesh("", "./meshes/", "hockey_helmet.glb", this.scene, 
+            (meshes) => {
+                console.log("Helmet model loaded successfully:", meshes);
+                const helmetMesh = meshes[0] as Mesh;
+                helmetMesh.name = name;
+                helmetMesh.position = tempMesh.position.clone();
+                helmetMesh.scaling = new Vector3(1.5, 1.5, 1.5);
+                
+                // Replace the temporary mesh with the helmet mesh
+                this.mesh = helmetMesh;
+                tempMesh.dispose();
+                console.log("Helmet mesh setup complete");
+            },
+            undefined,
+            (message) => {
+                console.error("Error loading helmet model:", message);
+            }
+        );
+
+        return tempMesh;
     }
 
     /**
      * Creates the coupon mesh that appears under the cup.
      */
     private createCouponMesh(name: string): Mesh {
-        const mesh = MeshBuilder.CreateBox(name, {
-            width: 0.8,
+        const puck = MeshBuilder.CreateCylinder(name, {
             height: 0.2,
-            depth: 0.8
+            diameter: 0.8,
+            tessellation: 20
         }, this.scene);
         
         const material = new StandardMaterial(name + '_material', this.scene);
-        material.diffuseColor = new Color3(1, 0, 0);
-        material.emissiveColor = new Color3(0.5, 0, 0);
-        mesh.material = material;
+        material.diffuseColor = new Color3(0.2, 0.2, 0.2); // Dark gray for puck
+        puck.material = material;
         
-        return mesh;
+        return puck;
     }
 
     /**

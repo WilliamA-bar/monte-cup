@@ -19,11 +19,11 @@ export class UIEntity {
     private timerInterval: NodeJS.Timeout | null = null;
 
     private readonly gameMessages = {
-        firstRoundWelcome: "Welcome to Cup Shuffle! Keep your eyes on the cup with the coupon!",
+        firstRoundWelcome: "Welcome to Three Cup Hockey! Keep your eyes on the helmet with the puck!",
         newRound: "ROUND",
         shuffling: "Shuffling cups...",
-        pickCup: "Pick the cup with the coupon!",
-        reveal: "Here was the coupon!",
+        pickCup: "Pick the helmet with the puck!",
+        reveal: "Here was the puck!",
         gameOver: "Game Over! Thanks for playing!"
     };
 
@@ -56,17 +56,17 @@ export class UIEntity {
     private createTimerText(): TextBlock {
         const text = new TextBlock();
         text.text = "";
-        text.color = "#FF4444";
-        text.fontSize = 48;
+        text.color = "#006847"; // Dallas Stars green
+        text.fontSize = 68;
         text.height = "80px";
         text.width = "150px";
-        text.fontFamily = "Righteous";
+        text.fontFamily = "Impact, 'Arial Black', sans-serif";
         text.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_RIGHT;
         text.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         text.paddingRight = "30px";
         text.paddingTop = "20px";
         text.outlineWidth = 4;
-        text.outlineColor = "#4A0404";
+        text.outlineColor = "#000000";
         text.shadowColor = "black";
         text.shadowOffsetX = 3;
         text.shadowOffsetY = 3;
@@ -78,15 +78,15 @@ export class UIEntity {
     private createDynamicText(): TextBlock {
         const text = new TextBlock();
         text.text = this.gameMessages.firstRoundWelcome;
-        text.color = "#FFD700";
+        text.color = "#006847"; // Dallas Stars green
         text.fontSize = 36;
         text.height = "80px";
-        text.fontFamily = "Righteous";
+        text.fontFamily = "Impact, 'Arial Black', sans-serif";
         text.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         text.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         text.paddingTop = "20px";
         text.outlineWidth = 4;
-        text.outlineColor = "#4A0404";
+        text.outlineColor = "#000000";
         text.shadowColor = "black";
         text.shadowOffsetX = 3;
         text.shadowOffsetY = 3;
@@ -97,16 +97,16 @@ export class UIEntity {
     private createRoundText(): TextBlock {
         const text = new TextBlock();
         text.text = "Round 1";
-        text.color = "#FFD700";
-        text.fontSize = 36;
+        text.color = "#006847"; // Dallas Stars green
+        text.fontSize = 56;
         text.height = "80px";
-        text.fontFamily = "Righteous";
+        text.fontFamily = "Impact, 'Arial Black', sans-serif";
         text.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         text.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         text.paddingLeft = "30px";
         text.paddingTop = "20px";
         text.outlineWidth = 4;
-        text.outlineColor = "#4A0404";
+        text.outlineColor = "#000000";
         text.shadowColor = "black";
         text.shadowOffsetX = 3;
         text.shadowOffsetY = 3;
