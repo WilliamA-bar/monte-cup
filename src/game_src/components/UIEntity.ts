@@ -176,7 +176,7 @@ export class UIEntity {
             case GAME_CONSTANTS.PHASES.GUESSING_PHASE:
                 this.dynamicText.text = this.gameMessages.pickCup;
                 // Start the timer for the guessing phase using the default 10 seconds if decision_time is not available
-                this.startTimer(room.state.decision_phase_duration ?? 10);
+                this.startTimer(GAME_CONSTANTS.GUESSING_PHASE_DURATION);
                 break;
             case GAME_CONSTANTS.PHASES.REVEAL_COUPON:
                 this.dynamicText.text = this.gameMessages.reveal;

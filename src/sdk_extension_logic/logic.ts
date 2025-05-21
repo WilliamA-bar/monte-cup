@@ -41,7 +41,8 @@ export class GameLogic extends BaseGameLogic<
   private async gameLoop(): Promise<void> {
     console.log("[GameLogic] Starting game loop");
     // So long as num players not eliminated > 1, continue the game loop
-    while (Object.values(this.state.players).filter(player => !player.isEliminated).length > 1 && this.isGameLoopRunning) {
+    // Original condition: while (Object.values(this.state.players).filter(player => !player.isEliminated).length > 1 && this.isGameLoopRunning)
+    while (this.state.round <= 3 && this.isGameLoopRunning) {
       console.log("[GameLogic] Game loop iteration");
       
       // Set phase to setup and generate starting cup
@@ -63,12 +64,12 @@ export class GameLogic extends BaseGameLogic<
       this.state.correct_cup_index = this.state.starting_cup; // Keep both in sync during transition
       await this.adapter.updateState(this.state);
       console.log("[GameLogic] Shuffling cups");
-      await new Promise(resolve => setTimeout(resolve, 9000));
+      await new Promise(resolve => setTimeout(resolve, 8000));
 
       // Guessing phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.GUESSING_PHASE;
       await this.adapter.updateState(this.state);
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
       // Reveal phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.REVEAL_COUPON;

@@ -68,7 +68,7 @@ export const GAME_CONSTANTS = {
     SHUFFLE_PACE_VARIANCE: 0.3, // seconds
   },
   MAXIMUM_RAMP_UPS: 6,
-  GUESSING_PHASE_DURATION: 10, // seconds
+  GUESSING_PHASE_DURATION: 5, // seconds
 } as const;
 
 export const baseInitialState: GameState<PlayerState> = {
