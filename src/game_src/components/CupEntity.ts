@@ -6,12 +6,13 @@ import '@babylonjs/loaders/glTF';
  * Handles the cup's mesh, animations, and interactions.
  */
 export class CupEntity {
-    private mesh: Mesh;
-    private couponMesh: Mesh;
+    private mesh!: Mesh;
+    private couponMesh!: Mesh;
     private scene: Scene;
     private isCorrect: boolean;
     private isOpenable: boolean;
     private id: number;
+    private position: Vector3;
 
     /**
      * Creates a new cup entity.
@@ -23,13 +24,18 @@ export class CupEntity {
     constructor(scene: Scene, position: Vector3, name: string = 'cup', isCorrect: boolean = false, id: number) {
         this.scene = scene;
         this.isCorrect = isCorrect;
-        this.mesh = this.createCupMesh(name);
-        this.couponMesh = this.createCouponMesh(name + '_coupon');
         this.id = id;
+        this.position = position;
+        this.isOpenable = false;
+    }
+
+    public async initialize(): Promise<void> {
+        this.mesh = await this.createCupMesh(this.mesh?.name || 'cup');
+        this.couponMesh = this.createCouponMesh(this.mesh.name + '_coupon');
         
         // Set initial positions
-        this.mesh.position = position;
-        this.couponMesh.position = position.clone();
+        this.mesh.position = this.position;
+        this.couponMesh.position = this.position.clone();
         this.couponMesh.position.y -= 0.5; // Position coupon below cup
         
         this.setupMaterial();
@@ -37,7 +43,6 @@ export class CupEntity {
         
         // Initially hide the coupon
         this.couponMesh.setEnabled(false);
-        this.isOpenable = false;
     }
 
     // PUBLIC METHODS
@@ -158,34 +163,34 @@ export class CupEntity {
     /**
      * Creates the cup's mesh.
      */
-    private createCupMesh(name: string): Mesh {
-        const tempMesh = MeshBuilder.CreateCylinder(name, {
-            height: 1.5,
-            diameter: 1.5,
-            tessellation: 20
-        }, this.scene);
+    private createCupMesh(name: string): Promise<Mesh> {
+        return new Promise((resolve) => {
+            const tempMesh = MeshBuilder.CreateCylinder(name, {
+                height: 1.5,
+                diameter: 1.5,
+                tessellation: 20
+            }, this.scene);
 
-        console.log("Attempting to load helmet model...");
-        SceneLoader.ImportMesh("", "./meshes/", "hockey_helmet.glb", this.scene, 
-            (meshes) => {
-                console.log("Helmet model loaded successfully:", meshes);
-                const helmetMesh = meshes[0] as Mesh;
-                helmetMesh.name = name;
-                helmetMesh.position = tempMesh.position.clone();
-                helmetMesh.scaling = new Vector3(1.5, 1.5, 1.5);
-                
-                // Replace the temporary mesh with the helmet mesh
-                this.mesh = helmetMesh;
-                tempMesh.dispose();
-                console.log("Helmet mesh setup complete");
-            },
-            undefined,
-            (message) => {
-                console.error("Error loading helmet model:", message);
-            }
-        );
-
-        return tempMesh;
+            SceneLoader.ImportMesh("", "./meshes/", "hockey_helmet.glb", this.scene, 
+                (meshes) => {
+                    const helmetMesh = meshes[0] as Mesh;
+                    helmetMesh.name = name;
+                    helmetMesh.position = tempMesh.position.clone();
+                    helmetMesh.scaling = new Vector3(1.5, 1.5, 1.5);
+                    
+                    // Replace the temporary mesh with the helmet mesh
+                    this.mesh = helmetMesh;
+                    tempMesh.dispose();
+                    resolve(helmetMesh);
+                },
+                undefined,
+                (scene, message) => {
+                    console.error("Error loading helmet model:", message);
+                    // If loading fails, use the temporary mesh
+                    resolve(tempMesh);
+                }
+            );
+        });
     }
 
     /**

@@ -38,17 +38,21 @@ export class CupLineEntity {
 
     public async initialize(): Promise<void> {
         // Place the cups in the line
+
         this.cups = [];
         const cup_spacing = this.line_length / (this.number_of_cups - 1);
+        
+        // Create all cups first
         for (let i = 0; i < this.number_of_cups; i++) {
             const position = this.start_position.clone().add(new Vector3(cup_spacing * i, 0, 0));
             const cup = new CupEntity(this.scene, position, 'cup' + i, false, i);
             this.cups.push(cup);
-            //const choice_entity = new PlayerChoiceEntity(this.scene, position);
-            // Don't enable choice entities by default
-            //this.choice_entities.push(choice_entity);
         }
+
+        // Initialize all cups in parallel
+        await Promise.all(this.cups.map(cup => cup.initialize()));
     }
+    
 
     public async displayCouponPhase(): Promise<void> {
         this.cups[this.room.state.starting_cup].setCorrect(true);
