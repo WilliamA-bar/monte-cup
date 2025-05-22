@@ -28,12 +28,83 @@ export interface GameState<P extends PlayerState> extends BaseGameState<P> {
   starting_cup: number;      // Index of the cup that has the prize 
   shuffle_sequence: number[][];  // Store the sequence of cup movements
   last_shuffle_time?: number;  // Track when the last shuffle occurred
+  world_entities: Record<string, HemletModel>;
   current_shuffle_parameters: {
     number_of_cups: number;
     shuffle_duration: number;
     shuffle_pace_base: number;
     shuffle_pace_variance: number;
   }
+}
+
+
+export class BaseWorldModel {
+  private position: { x: number, y: number, z: number };
+  private id: string;
+  private rotation: { x: number, y: number, z: number };
+  private visible: boolean;
+
+  constructor(position: { x: number, y: number, z: number }, id: string, rotation: { x: number, y: number, z: number }, visible: boolean) {
+    this.position = position;
+    this.id = id;
+    this.rotation = rotation;
+    this.visible = visible;
+  }
+
+  public getPosition(): { x: number, y: number, z: number } {
+    return this.position;
+  }
+
+  public getRotation(): { x: number, y: number, z: number } {
+    return this.rotation;
+  }
+  
+  public getVisible(): boolean {
+    return this.visible;
+  }
+
+  public setVisible(visible: boolean): void {
+    this.visible = visible;
+  }
+
+  public setPosition(position: { x: number, y: number, z: number }): void {
+    this.position = position;
+  }
+
+  public setRotation(rotation: { x: number, y: number, z: number }): void {
+    this.rotation = rotation;
+  }
+
+  public getId(): string {
+    return this.id;
+  }
+
+}
+
+
+export class HemletModel extends BaseWorldModel {
+
+  private mesh_path: string;
+  private displaying_coupon: boolean;
+
+  constructor(position: { x: number, y: number, z: number }, id: string, rotation: { x: number, y: number, z: number }, visible: boolean) {
+    super(position, id, rotation, visible);
+    this.mesh_path = "models/hemlet.glb";
+    this.displaying_coupon = false;
+  }
+
+  public getMeshPath(): string {
+    return this.mesh_path;
+  }
+
+  public getDisplayingCoupon(): boolean {
+    return this.displaying_coupon;
+  }
+
+  public setDisplayingCoupon(displaying_coupon: boolean): void {
+    this.displaying_coupon = displaying_coupon;
+  }
+
 }
 
 export type MessageType = BaseMessageType | "VOTE" | "PHASE_COMPLETE" | "SIMULATION_OUTCOME";
@@ -57,7 +128,7 @@ export const GAME_CONSTANTS = {
   ROUND_ONE_SHUFFLE_PARAMETERS: {
     NUMBER_OF_CUPS: 3,
     SHUFFLE_DURATION: 10, // seconds
-    SHUFFLE_PACE_BASE: 0.35, // seconds
+    SHUFFLE_PACE_BASE: 0.27, // seconds
     SHUFFLE_PACE_VARIANCE: 0.1, // seconds
   },
   RAMP_UP_AFTER_THIS_MANY_ROUNDS: 2,

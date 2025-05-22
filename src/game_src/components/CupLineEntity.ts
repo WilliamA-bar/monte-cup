@@ -45,7 +45,7 @@ export class CupLineEntity {
         // Create all cups first
         for (let i = 0; i < this.number_of_cups; i++) {
             const position = this.start_position.clone().add(new Vector3(cup_spacing * i, 0, 0));
-            const cup = new CupEntity(this.scene, position, 'cup' + i, false, i);
+            const cup = new CupEntity(this.scene, position, 'cup' + i, i);
             this.cups.push(cup);
         }
 
@@ -55,7 +55,6 @@ export class CupLineEntity {
     
 
     public async displayCouponPhase(): Promise<void> {
-        this.cups[this.room.state.starting_cup].setCorrect(true);
         await this.cups[this.room.state.starting_cup].revealContents();
     }
 
@@ -93,7 +92,6 @@ export class CupLineEntity {
     public async resetLine(): Promise<void> {
         for (let i = 0; i < this.number_of_cups; i++) {
             this.cups[i].setOpenable(false);
-            this.cups[i].setCorrect(false);
         }
 
         // Clear choice entities
@@ -111,7 +109,6 @@ export class CupLineEntity {
 
         // Update the correct cup index'
         this.room.state.starting_cup = Math.floor(Math.random() * this.number_of_cups);
-        this.cups[this.room.state.starting_cup].setCorrect(true);
     }
 
     public async shuffleLinePhase(): Promise<void> {

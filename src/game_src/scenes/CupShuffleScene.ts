@@ -1,4 +1,4 @@
-import { Vector3, HemisphericLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera, Texture } from '@babylonjs/core';
+import { Vector3, HemisphericLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera, Texture,     LensRenderingPipeline, ShadowGenerator, Mesh } from '@babylonjs/core';
 import { SceneContainer } from '../core/SceneContainer';
 import { CupLineEntity } from '../components/CupLineEntity';
 import { UIEntity } from '../components/UIEntity';
@@ -11,6 +11,7 @@ export class CupShuffleScene extends SceneContainer {
     private uiEntity: UIEntity | null = null;
     private currentPhase: string | null = null;
     private stateCheckInterval: NodeJS.Timeout | null = null;
+    private ground: Mesh | null = null;
 
     public async initialize(): Promise<void> {
         await this.beforeStart();
@@ -92,51 +93,62 @@ export class CupShuffleScene extends SceneContainer {
         this.mainCamera = new ArcRotateCamera(
             'mainCamera',
             Math.PI / 2,
-            Math.PI / 3,
+            Math.PI / 2.5,
             10,
-            Vector3.Zero(),
+            new Vector3(0, 0.5, 0),
             this.scene
         );
         this.camera = this.mainCamera;
         this.mainCamera.inputs.clear();
+
+        const parameters = {
+            chromatic_aberration: 0.2,
+        };
+        new LensRenderingPipeline('lensEffects', parameters, this.scene, 1.0, [this.camera]);
     }
 
     protected async setupEnvironment(): Promise<void> {
-        const ground = MeshBuilder.CreateGround('ground', {
-            width: 25,
-            height: 20,
-            subdivisions: 2
+        this.ground = MeshBuilder.CreateGround('ground', {
+            width: 165,
+            height: 150,
+            subdivisions: 1
         }, this.scene);
 
         const groundMaterial = new StandardMaterial('groundMaterial', this.scene);
-        const woodTexture = new Texture("./textures/seamless-wood.avif", this.scene);
-        woodTexture.uScale = 1; // Adjust these values to control texture tiling
-        woodTexture.vScale = 1;
-        groundMaterial.diffuseTexture = woodTexture;
+        const iceTexture = new Texture("./textures/ice2.jpg", this.scene);
+        iceTexture.uScale = 1; // Adjust these values to control texture tiling
+        iceTexture.vScale = 1;
+        groundMaterial.diffuseTexture = iceTexture;
         groundMaterial.specularColor = new Color3(0.1, 0.1, 0.1);
-        groundMaterial.roughness = 0.3;
-        ground.material = groundMaterial;
+        groundMaterial.roughness = 0.1;
+        this.ground.material = groundMaterial;
     }
 
     protected setupLights(): void {
         const ambientLight = new HemisphericLight('ambientLight', new Vector3(0, 1, 0), this.scene);
-        ambientLight.intensity = 0.5;
-        ambientLight.groundColor = new Color3(0.1, 0.05, 0.05);
-        ambientLight.diffuse = new Color3(0.8, 0.7, 0.6);
+        ambientLight.intensity = 0.3;
+        ambientLight.groundColor = new Color3(0.549, 0.596, .639);
+        ambientLight.diffuse = new Color3(0.78, 0.894, 1);
 
-        const spotLight = new PointLight('spotLight', new Vector3(0, 8, 0), this.scene);
-        spotLight.intensity = 0.7;
-        spotLight.diffuse = new Color3(1, 0.9, 0.7);
-        spotLight.specular = new Color3(1, 0.9, 0.7);
-        spotLight.radius = 0.1;
-        spotLight.range = 20;
+        const spotLight = new PointLight('spotLight', new Vector3(0, 8, -10), this.scene);
+        spotLight.intensity = 0.9;
+        spotLight.diffuse = new Color3(.933, 0.969, 1);
+        spotLight.specular = new Color3(.933, 0.969, 1);
+        spotLight.radius = 1.5;
+        spotLight.range = 17;
 
         const frontLight = new PointLight('frontLight', new Vector3(0, 0, 10), this.scene);
-        frontLight.intensity = 0.5;
+        frontLight.intensity = 0.7;
         frontLight.diffuse = new Color3(0.9, 0.8, 0.6);
         frontLight.specular = new Color3(0.9, 0.8, 0.6);
         frontLight.radius = 0.1;
         frontLight.range = 20;
+
+        const shadowGenerator = new ShadowGenerator(1024, spotLight);
+        const shadowMap = shadowGenerator.getShadowMap();
+        if (shadowMap?.renderList && this.ground) {
+            shadowMap.renderList.push(this.ground);
+        }
     }
 
     protected onGameStateChanged(state: GameState<PlayerState>): void {

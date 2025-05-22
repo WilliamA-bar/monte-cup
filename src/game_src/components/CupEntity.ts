@@ -1,4 +1,4 @@
-import { Mesh, Scene, MeshBuilder, Vector3, StandardMaterial, Color3, Animation, ActionManager, ExecuteCodeAction, QuadraticEase, EasingFunction } from '@babylonjs/core';
+import { Mesh, Scene, MeshBuilder, Vector3, StandardMaterial, Color3, ActionManager, ExecuteCodeAction, Observer } from '@babylonjs/core';
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 import '@babylonjs/loaders/glTF';
 /**
@@ -9,26 +9,30 @@ export class CupEntity {
     private mesh!: Mesh;
     private couponMesh!: Mesh;
     private scene: Scene;
-    private isCorrect: boolean;
     private isOpenable: boolean;
     private id: number;
+    private isOpened: boolean;
     private position: Vector3;
     private name: string;
+    private positionObserver: Observer<Scene>;
 
     /**
      * Creates a new cup entity.
      * @param scene The BabylonJS scene
      * @param position Initial position of the cup
      * @param name Unique identifier for the cup
-     * @param isCorrect Whether this cup contains the coupon
      */
-    constructor(scene: Scene, position: Vector3, name: string = 'cup', isCorrect: boolean = false, id: number) {
+    constructor(scene: Scene, position: Vector3, name: string = 'cup', id: number) {
         this.scene = scene;
-        this.isCorrect = isCorrect;
         this.id = id;
         this.position = position;
         this.isOpenable = false;
+        this.isOpened = false;
         this.name = name;
+        // Store the observer reference
+        this.positionObserver = this.scene.onBeforeRenderObservable.add(() => {
+            this.updateMeshes();
+        });
     }
 
     public async initialize(): Promise<void> {
@@ -38,13 +42,26 @@ export class CupEntity {
         // Set initial positions
         this.mesh.position = this.position;
         this.couponMesh.position = this.position.clone();
-        this.couponMesh.position.y -= 0.5; // Position coupon below cup
+        this.couponMesh.rotation.x = Math.PI / 6;
         
         this.setupMaterial();
         this.setupClickAction();
         
         // Initially hide the coupon
         this.couponMesh.setEnabled(false);
+        //this.mesh.setEnabled(false);
+    }
+
+    private updateMeshes(): void {
+        // Keep the helmet (mesh) stationary
+        this.mesh.position = this.position.clone();
+        this.mesh.position.y = 1; // Keep helmet at ground level
+        this.couponMesh.rotation.y += 0.06;
+
+        // Move the hockey puck (couponMesh) up and down
+        this.couponMesh.position = this.position.clone();
+        this.couponMesh.position.y = this.position.y; // Use the y position from lift()
+        this.couponMesh.setEnabled(this.isOpened);
     }
 
     // PUBLIC METHODS
@@ -53,22 +70,7 @@ export class CupEntity {
      * Gets the current position of the cup.
      */
     public getPosition(): Vector3 {
-        return this.mesh.position;
-    }
-
-    /**
-     * Gets whether this cup contains the coupon.
-     * @returns True if this cup contains the coupon, false otherwise
-     */
-    public getCorrect(): boolean {
-        return this.isCorrect;
-    }
-
-    /**
-     * Sets whether this cup contains the coupon.
-     */
-    public setCorrect(isCorrect: boolean): void {
-        this.isCorrect = isCorrect;
+        return this.position;
     }
 
     /**
@@ -93,8 +95,9 @@ export class CupEntity {
      */
     public async shuffleTo(targetPosition: Vector3, duration: number = 1, shuffle_back: boolean = false): Promise<void> {
         return new Promise((resolve) => {
-            const startPosition = this.mesh.position.clone();
+            const startPosition = this.position.clone();
             const endPosition = targetPosition.clone();
+            endPosition.y = startPosition.y;
             
             // Calculate arc parameters
             const radius = Vector3.Distance(startPosition, endPosition) / 2;
@@ -106,29 +109,32 @@ export class CupEntity {
                 : new Vector3(-direction.z, 0, direction.x);
 
             const startTime = Date.now();
-            const observer = this.scene.onBeforeRenderObservable.add(() => {
+            
+            const updatePosition = () => {
                 const currentTime = Date.now();
-                const elapsedTime = (currentTime - startTime) / 1000;
+                const elapsed = (currentTime - startTime) / 1000; // Convert to seconds
+                const progress = Math.min(elapsed / duration, 1);
                 
-                if (elapsedTime >= duration) {
-                    this.mesh.position = endPosition;
-                    this.scene.onBeforeRenderObservable.remove(observer);
-                    resolve();
-                    return;
-                }
-
-                // Calculate eased time using quadratic ease out
-                const t = elapsedTime / duration;
+                // Quadratic ease out
+                const easedProgress = 1 - (1 - progress) * (1 - progress);
                 
                 // Calculate position with eased timing
-                const linearPos = Vector3.Lerp(startPosition, endPosition, t);
-                const sideOffset = Math.sin(Math.PI * t) * radius;
+                const linearPos = Vector3.Lerp(startPosition, endPosition, easedProgress);
+                const sideOffset = Math.sin(Math.PI * easedProgress) * radius;
                 const newPos = linearPos.add(perpendicular.scale(sideOffset));
                 newPos.y = startPosition.y;
                 
-                this.mesh.position = newPos;
-            });
-            this.couponMesh.position = this.mesh.position;
+                this.position = newPos;
+                
+                if (progress < 1) {
+                    setTimeout(updatePosition, 16);
+                } else {
+                    this.position = endPosition;
+                    resolve();
+                }
+            };
+            
+            updatePosition();
         });
     }
 
@@ -136,23 +142,13 @@ export class CupEntity {
      * Reveals the contents of the cup by lifting it.
      */
     public async revealContents(): Promise<void> {
-        if (this.isCorrect) {
-            this.couponMesh.isVisible = true;
-        }
-
-        console.log("Should show coupon:", this.isCorrect);
-        await this.lift(3);
-        await new Promise<void>(resolve => {
-            let timeElapsed = 0;
-            const observer = this.scene.onBeforeRenderObservable.add(() => {
-                timeElapsed += this.scene.getEngine().getDeltaTime();
-                if (timeElapsed >= 2000) {
-                    this.scene.onBeforeRenderObservable.remove(observer);
-                    resolve();
-                }
-            });
-        });
-        await this.lift(-3);
+        this.isOpened = true;
+        
+        await this.lift(2.5);
+        setTimeout(() => {
+            this.lift(-2.5);
+        }, 2500);
+        
     }
 
     /**
@@ -161,6 +157,7 @@ export class CupEntity {
     public dispose(): void {
         this.mesh.dispose();
         this.couponMesh.dispose();
+        this.scene.onBeforeRenderObservable.remove(this.positionObserver);
     }
 
     // PRIVATE METHODS
@@ -176,7 +173,7 @@ export class CupEntity {
                 tessellation: 20
             }, this.scene);
 
-            SceneLoader.ImportMesh("", "./meshes/", "hockey_helmet.glb", this.scene, 
+            SceneLoader.ImportMesh("", "./meshes/", "helmet2strapless.glb", this.scene, 
                 (meshes) => {
                     const helmetMesh = meshes[0] as Mesh;
                     helmetMesh.name = name;
@@ -245,94 +242,35 @@ export class CupEntity {
     /**
      * Lifts the cup up or down by the specified height.
      */
-    public async lift(height: number, duration: number = 0.5): Promise<void> {
-        const targetPosition = this.mesh.position.clone();
+    public lift(height: number, duration: number = 0.5): void {
+        const startPosition = this.position.clone();
+        const targetPosition = this.position.clone();
         targetPosition.y += height;
+        const startTime = Date.now();
         
-        // Keep coupon on the ground when cup is lifted
-        if (this.isCorrect) {
-            const shouldShow = targetPosition.y > .4;
+        const updatePosition = () => {
+            const currentTime = Date.now();
+            const elapsed = (currentTime - startTime) / 1000; // Convert to seconds
+            const progress = Math.min(elapsed / duration, 1);
             
-            // Keep coupon at ground level but update x and z to match cup
-            this.couponMesh.position.x = this.mesh.position.x;
-            this.couponMesh.position.z = this.mesh.position.z;
-            this.couponMesh.position.y = 0.1; // Slightly above ground
+            // Quadratic ease out
+            const easedProgress = 1 - (1 - progress) * (1 - progress);
             
-            this.couponMesh.setEnabled(shouldShow);
-            this.couponMesh.isVisible = shouldShow;
-        }
+            // Update position directly
+            this.position = Vector3.Lerp(startPosition, targetPosition, easedProgress);
+            
+            // Show/hide the coupon based on height
+            // If the cup is lifted more than 1 unit, show the coupon
+            this.isOpened = this.position.y > 0.76;
 
-        await this.moveTo(targetPosition, duration);
-    }
-
-
-    private async moveTo(targetPosition: Vector3, duration: number = 1): Promise<void> {
-        return new Promise((resolve) => {
-            const frameRate = 60;
-            const animation = new Animation(
-                'cupMovement',
-                'position',
-                frameRate,
-                Animation.ANIMATIONTYPE_VECTOR3,
-                Animation.ANIMATIONLOOPMODE_CONSTANT
-            );
-
-            const keyFrames = [
-                { frame: 0, value: this.mesh.position.clone() },
-                { frame: frameRate * duration, value: targetPosition }
-            ];
-            animation.setKeys(keyFrames);
-            const quadraticEase = new QuadraticEase();
-            quadraticEase.setEasingMode(EasingFunction.EASINGMODE_EASEOUT); // This will make it start fast and slow down
-            animation.setEasingFunction(quadraticEase);
-            this.mesh.animations = [animation];
-
-            // For coupon, only animate X and Z, keep Y at ground level
-            if (this.isCorrect) {
-                const couponAnimation = new Animation(
-                    'couponMovement',
-                    'position',
-                    frameRate,
-                    Animation.ANIMATIONTYPE_VECTOR3,
-                    Animation.ANIMATIONLOOPMODE_CONSTANT
-                );
-
-                const couponKeyFrames = [
-                    { 
-                        frame: 0, 
-                        value: new Vector3(
-                            this.mesh.position.x,
-                            0.1, // Keep at ground level
-                            this.mesh.position.z
-                        )
-                    },
-                    { 
-                        frame: frameRate * duration, 
-                        value: new Vector3(
-                            targetPosition.x,
-                            0.1, // Keep at ground level
-                            targetPosition.z
-                        )
-                    }
-                ];
-                couponAnimation.setKeys(couponKeyFrames);
-                couponAnimation.setEasingFunction(quadraticEase); // Use the same easing for the coupon
-                this.couponMesh.animations = [couponAnimation];
+            console.log("Position", this.position," isOpened", this.isOpened);
+            
+            if (progress < 1) {
+                setTimeout(updatePosition, 16);
             }
-
-            this.scene.beginAnimation(this.mesh, 0, frameRate * duration, false, 1, () => {
-                if (this.isCorrect) {
-                    const shouldShow = this.mesh.position.y > 1;
-                    this.couponMesh.setEnabled(shouldShow);
-                    this.couponMesh.isVisible = shouldShow;
-                }
-                resolve();
-            });
-
-            if (this.isCorrect) {
-                this.scene.beginAnimation(this.couponMesh, 0, frameRate * duration, false);
-            }
-        });
+        };
+        
+        updatePosition();
     }
 
 }

@@ -6,6 +6,7 @@ import {
   MessagePayloads,
   MessageType,
   PlayerState,
+  HemletModel,
 } from "./schema";
 
 /**
@@ -34,16 +35,35 @@ export class GameLogic extends BaseGameLogic<
   public startGame(): void {
     if (!this.isGameLoopRunning) {
       this.isGameLoopRunning = true;
+      this.state.world_entities = {
+        hemlet: new HemletModel(
+          { x: 0, y: 0, z: 0 },
+          "hemlet",
+          { x: 0, y: 0, z: 0 },
+          true
+        ),
+      };
       this.gameLoop();
     }
   }
 
   private async gameLoop(): Promise<void> {
     console.log("[GameLogic] Starting game loop");
+
     // So long as num players not eliminated > 1, continue the game loop
     // Original condition: while (Object.values(this.state.players).filter(player => !player.isEliminated).length > 1 && this.isGameLoopRunning)
     while (this.state.round <= 3 && this.isGameLoopRunning) {
       console.log("[GameLogic] Game loop iteration");
+      // for (let i = 0; i < 50000; i++) {
+      //   const helmet = this.state.world_entities.hemlet;
+      //   const pos = helmet.getPosition();
+      //   helmet.setPosition({ 
+      //       x: pos.x + 0, 
+      //       y: pos.y + 0.5, 
+      //       z: pos.z + 0.5 
+      //   });
+      //   await this.adapter.updateState(this.state);
+      // }
       
       // Set phase to setup and generate starting cup
       this.state.game_phase = GAME_CONSTANTS.PHASES.SETUP;
