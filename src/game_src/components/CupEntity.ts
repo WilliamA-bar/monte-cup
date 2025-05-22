@@ -1,4 +1,4 @@
-import { Mesh, Scene, MeshBuilder, Vector3, StandardMaterial, Color3, ActionManager, ExecuteCodeAction, Observer } from '@babylonjs/core';
+import { Mesh, Scene, MeshBuilder, Vector3, StandardMaterial, Color3, ActionManager, ExecuteCodeAction, Observer, Texture } from '@babylonjs/core';
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 import '@babylonjs/loaders/glTF';
 /**
@@ -179,6 +179,20 @@ export class CupEntity {
                     helmetMesh.name = name;
                     helmetMesh.position = tempMesh.position.clone();
                     helmetMesh.scaling = new Vector3(1.5, 1.5, 1.5);
+
+                    // Enhance material quality
+                    if (helmetMesh.material) {
+                        const material = helmetMesh.material as StandardMaterial;
+                        // Increase texture quality
+                        
+                        material.diffuseTexture!.anisotropicFilteringLevel = 16;
+                        material.diffuseTexture!.updateSamplingMode(Texture.TRILINEAR_SAMPLINGMODE);
+                        
+                        // Enhance specular and reflection
+                        material.specularPower = 32;
+                        material.useSpecularOverAlpha = true;
+                        material.useReflectionOverAlpha = true;
+                    }
                     
                     // Replace the temporary mesh with the helmet mesh
                     this.mesh = helmetMesh;
