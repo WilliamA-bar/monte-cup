@@ -1,4 +1,4 @@
-import { Vector3, HemisphericLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera, Texture,     LensRenderingPipeline, ShadowGenerator, Mesh } from '@babylonjs/core';
+import { Vector3, HemisphericLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera, Texture,     LensRenderingPipeline, ShadowGenerator, Mesh, SceneLoader } from '@babylonjs/core';
 import { SceneContainer } from '../core/SceneContainer';
 import { CupLineEntity } from '../components/CupLineEntity';
 import { UIEntity } from '../components/UIEntity';
@@ -93,21 +93,23 @@ export class CupShuffleScene extends SceneContainer {
         this.mainCamera = new ArcRotateCamera(
             'mainCamera',
             Math.PI / 2,
-            Math.PI / 2.5,
-            10,
-            new Vector3(0, 0.5, 0),
+            Math.PI / 2.3,
+            11,
+            new Vector3(0, 1.5, 0),
             this.scene
         );
         this.camera = this.mainCamera;
-        this.mainCamera.inputs.clear();
+        this.camera.attachControl(this.canvas, true);
+        //this.mainCamera.inputs.clear();
 
         const parameters = {
-            chromatic_aberration: 0.2,
+            
         };
         new LensRenderingPipeline('lensEffects', parameters, this.scene, 1.0, [this.camera]);
     }
 
     protected async setupEnvironment(): Promise<void> {
+        // Create ground with ice texture
         this.ground = MeshBuilder.CreateGround('ground', {
             width: 165,
             height: 150,
@@ -115,18 +117,32 @@ export class CupShuffleScene extends SceneContainer {
         }, this.scene);
 
         const groundMaterial = new StandardMaterial('groundMaterial', this.scene);
-        const iceTexture = new Texture("./textures/ice2.jpg", this.scene);
-        iceTexture.uScale = 1; // Adjust these values to control texture tiling
-        iceTexture.vScale = 1;
+        const iceTexture = new Texture("./textures/iceper.png", this.scene);
+        iceTexture.anisotropicFilteringLevel = 16; 
+        iceTexture.updateSamplingMode(Texture.TRILINEAR_SAMPLINGMODE);
+        iceTexture.uScale = 7;
+        iceTexture.vScale = 7;
         groundMaterial.diffuseTexture = iceTexture;
-        groundMaterial.specularColor = new Color3(0.1, 0.1, 0.1);
-        groundMaterial.roughness = 0.1;
+        groundMaterial.specularColor = new Color3(0.1, 0.1, 0.2);
+        groundMaterial.roughness = 0.0;
         this.ground.material = groundMaterial;
+
+        // Load the rink model - only load once
+        const result = await SceneLoader.ImportMeshAsync("", "./meshes/", "dallasrink.glb", this.scene);
+        
+        // Position and scale the rink
+        result.meshes.forEach(mesh => {
+            if (mesh.name !== "__root__") {  // Skip the root mesh
+                mesh.scaling = new Vector3(3.5, 3.5, 3.5);
+                mesh.position = new Vector3(0, 0, -40);
+                
+            }
+        });
     }
 
     protected setupLights(): void {
-        const ambientLight = new HemisphericLight('ambientLight', new Vector3(0, 1, 0), this.scene);
-        ambientLight.intensity = 0.3;
+        const ambientLight = new HemisphericLight('ambientLight', new Vector3(5, 1, 11), this.scene);
+        ambientLight.intensity = 0.4;
         ambientLight.groundColor = new Color3(0.549, 0.596, .639);
         ambientLight.diffuse = new Color3(0.78, 0.894, 1);
 
@@ -137,7 +153,9 @@ export class CupShuffleScene extends SceneContainer {
         spotLight.radius = 1.5;
         spotLight.range = 17;
 
-        const frontLight = new PointLight('frontLight', new Vector3(0, 0, 10), this.scene);
+        
+
+        const frontLight = new PointLight('frontLight', new Vector3(0, 5, 8), this.scene);
         frontLight.intensity = 0.7;
         frontLight.diffuse = new Color3(0.9, 0.8, 0.6);
         frontLight.specular = new Color3(0.9, 0.8, 0.6);
