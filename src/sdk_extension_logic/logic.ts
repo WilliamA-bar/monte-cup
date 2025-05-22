@@ -47,35 +47,6 @@ export class GameLogic extends BaseGameLogic<
     }
   }
 
-  private async debugGameLoop(): Promise<void> {
-    while (this.isGameLoopRunning) {
-
-      for (let i = 0; i < 50000; i++) {
-        const helmet = this.state.world_entities.hemlet;
-        const pos = helmet.getPosition();
-        helmet.setPosition({ 
-            x: pos.x + 0, 
-            y: pos.y + 1, 
-            z: pos.z + 0.1 
-        });
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-      console.log("[GameLogic] Debug game loop iteration");
-      const helmet = this.state.world_entities.hemlet;
-      const time = Date.now() / 1000; // Convert to seconds
-      const radius = 5; // Circle radius
-      const speed = 1; // Rotations per second
-    
-      // Calculate new position
-      const x = Math.cos(time * speed * Math.PI * 2) * radius;
-      const z = Math.sin(time * speed * Math.PI * 2) * radius;
-    
-      // Update helmet position
-      helmet.setPosition({ x, y: 0, z });
-  
-    }
-  }
-
   private async gameLoop(): Promise<void> {
     console.log("[GameLogic] Starting game loop");
 
@@ -83,16 +54,16 @@ export class GameLogic extends BaseGameLogic<
     // Original condition: while (Object.values(this.state.players).filter(player => !player.isEliminated).length > 1 && this.isGameLoopRunning)
     while (this.state.round <= 3 && this.isGameLoopRunning) {
       console.log("[GameLogic] Game loop iteration");
-      for (let i = 0; i < 50000; i++) {
-        const helmet = this.state.world_entities.hemlet;
-        const pos = helmet.getPosition();
-        helmet.setPosition({ 
-            x: pos.x + 0, 
-            y: pos.y + 0.5, 
-            z: pos.z + 0.5 
-        });
-        await this.adapter.updateState(this.state);
-      }
+      // for (let i = 0; i < 50000; i++) {
+      //   const helmet = this.state.world_entities.hemlet;
+      //   const pos = helmet.getPosition();
+      //   helmet.setPosition({ 
+      //       x: pos.x + 0, 
+      //       y: pos.y + 0.5, 
+      //       z: pos.z + 0.5 
+      //   });
+      //   await this.adapter.updateState(this.state);
+      // }
       
       // Set phase to setup and generate starting cup
       this.state.game_phase = GAME_CONSTANTS.PHASES.SETUP;

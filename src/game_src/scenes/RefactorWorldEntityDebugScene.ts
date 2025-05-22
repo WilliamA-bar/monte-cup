@@ -1,7 +1,7 @@
 import { PlayerState } from "../../sdk_extension_logic/schema";
 import { GameState } from "../../sdk_extension_logic/schema";
 import { SceneContainer } from "../core/SceneContainer";
-import {  ArcRotateCamera, Color3, HemisphericLight, MeshBuilder, StandardMaterial, Vector3 } from "@babylonjs/core";
+import {  ArcRotateCamera, HemisphericLight, MeshBuilder, StandardMaterial, Vector3 } from "@babylonjs/core";
 import { RefactoredHelmetEntity } from "../components/RefactoredHelmetEntity";
 
 export class RefactorWorldEntityDebugScene extends SceneContainer {

@@ -16,6 +16,19 @@ export class RefactoredEntity {
     public update(deltaTime: number, model: BaseWorldModel): void {
         this.mesh.position.y = model.getPosition().y;
         this.model = model;
+        console.log("deltaTime", deltaTime);
+    }
+
+    public getMesh(): Mesh {
+        return this.mesh;
+    }
+
+    public getModel(): BaseWorldModel {
+        return this.model;
+    }
+
+    public getScene(): Scene {
+        return this.scene;
     }
 
 }

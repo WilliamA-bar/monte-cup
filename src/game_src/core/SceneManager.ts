@@ -1,7 +1,7 @@
 import { Engine } from '@babylonjs/core';
 import { SceneContainer } from './SceneContainer';
-//import { CupShuffleScene } from '../scenes/CupShuffleScene';
-import { RefactorWorldEntityDebugScene } from '../scenes/RefactorWorldEntityDebugScene';
+import { CupShuffleScene } from '../scenes/CupShuffleScene';
+//import { RefactorWorldEntityDebugScene } from '../scenes/RefactorWorldEntityDebugScene';
 import { BaseHostRoom } from '../../sdk';
 import type { GameState, PlayerState, MessageType, MessagePayloads } from '../../sdk_extension_logic/schema';
 
@@ -20,11 +20,11 @@ export class SceneManager {
 
     public async initialize(): Promise<void> {
         // Create and register the game scene
-        //const gameScene = new CupShuffleScene(this.engine, this.canvas, this.room);
-        const refactorWorldEntityDebugScene = new RefactorWorldEntityDebugScene(this.engine, this.canvas, this.room);
+        const gameScene = new CupShuffleScene(this.engine, this.canvas, this.room);
+        //const refactorWorldEntityDebugScene = new RefactorWorldEntityDebugScene(this.engine, this.canvas, this.room);
         //const debugScene = new ChoiceEntityDebugScene(this.engine, this.canvas);
         //const cupLineDebugScene = new CupLineEntityDebugScene(this.engine, this.canvas);
-        this.registerScene('game', refactorWorldEntityDebugScene);
+        this.registerScene('game', gameScene);
         //this.registerScene('refactorWorldEntityDebug', refactorWorldEntityDebugScene);
         //this.registerScene('debug', debugScene);
         //this.registerScene('cupLineDebug', cupLineDebugScene);
