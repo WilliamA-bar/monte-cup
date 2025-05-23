@@ -1,12 +1,10 @@
 import { Vector3, HemisphericLight, SpotLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera, Texture,     LensRenderingPipeline, ShadowGenerator, Mesh, SceneLoader } from '@babylonjs/core';
 import { SceneContainer } from '../core/SceneContainer';
 import { CupLineEntity } from '../components/CupLineEntity';
-import { UIEntity } from '../components/UIEntity';
 import { GameState, PlayerState, GAME_CONSTANTS } from '../../sdk_extension_logic/schema';
 export class CupShuffleScene extends SceneContainer {
     private mainCamera!: ArcRotateCamera;
     private cupLine: CupLineEntity | null = null;
-    private uiEntity: UIEntity | null = null;
     private currentPhase: string | null = null;
     private stateCheckInterval: NodeJS.Timeout | null = null;
     private ground: Mesh | null = null;
@@ -25,12 +23,8 @@ export class CupShuffleScene extends SceneContainer {
     }
 
     private async runActionsBasedOnState(): Promise<void> {
-        //console.log("[Client] Running actions based on state");
-        if (!this.uiEntity) return;
-        
         // Only process if this is a new phase
         if (this.currentPhase === this.room.state.game_phase) {
-            //console.log("[Client] Same phase, skipping");
             // Wait for 1 second before running the next action
             await new Promise(resolve => setTimeout(resolve, 1000));
             return;
@@ -44,25 +38,21 @@ export class CupShuffleScene extends SceneContainer {
                 break;
             case GAME_CONSTANTS.PHASES.DISPLAY_COUPON:
                 console.log("[Client] Entered phase: DisplayCoupon");
-                this.uiEntity.setMessage(this.room);
                 await this.displayCouponPhase();
                 console.log("[Client] Exited phase: DisplayCoupon");
                 break;
             case GAME_CONSTANTS.PHASES.SHUFFLE_CUPS:
                 console.log("[Client] Entered phase: ShuffleCups");
-                this.uiEntity.setMessage(this.room);
                 await this.shuffleCups();
                 console.log("[Client] Exited phase: ShuffleCups");
                 break;
             case GAME_CONSTANTS.PHASES.GUESSING_PHASE:
                 console.log("[Client] Entered phase: GuessingPhase");
-                this.uiEntity.setMessage(this.room);
                 await this.guessingPhase();
                 console.log("[Client] Exited phase: GuessingPhase");
                 break;
             case GAME_CONSTANTS.PHASES.REVEAL_COUPON:
                 console.log("[Client] Entered phase: RevealCoupon");
-                this.uiEntity.setMessage(this.room);
                 await this.revealCoupon();
                 console.log("[Client] Exited phase: RevealCoupon");
                 break;
@@ -73,7 +63,6 @@ export class CupShuffleScene extends SceneContainer {
                 break;
             case GAME_CONSTANTS.PHASES.GAME_OVER:
                 console.log("[Client] Entered phase: GameOver");
-                await this.uiEntity.setMessage(this.room);
                 console.log("[Client] Exited phase: GameOver");
                 break;
             default:
@@ -83,11 +72,10 @@ export class CupShuffleScene extends SceneContainer {
     }
 
     public async beforeStart(): Promise<void> {
-        this.scene.clearColor = new Color4(0.1, 0.1, 0.15, 1);
+        this.scene.clearColor = new Color4(0.05, 0.05, 0.10, 1);
         this.setupCamera();
         await this.setupEnvironment();
         this.setupLights();
-        this.uiEntity = new UIEntity(this.scene);
     }
 
     protected setupCamera(): void {
@@ -100,7 +88,7 @@ export class CupShuffleScene extends SceneContainer {
             this.scene
         );
         this.camera = this.mainCamera;
-        this.camera.attachControl(this.canvas, true);
+        //this.camera.attachControl(this.canvas, true);
         //this.mainCamera.inputs.clear();
 
         const parameters = {
@@ -195,7 +183,7 @@ export class CupShuffleScene extends SceneContainer {
         ground4Material.diffuseTexture = iceTexture;
         const ice2Texture = new Texture("./textures/ice.png", this.scene);
         ice2Texture.anisotropicFilteringLevel = 16; 
-        ice2Texture.updateSamplingMode(Texture.LINEAR_LINEAR_MIPLINEAR);
+        //ice2Texture.updateSamplingMode(Texture.LINEAR_LINEAR_MIPLINEAR);
         ice2Texture.uScale = 9;
         ice2Texture.vScale = 9;
         ice2Texture.hasAlpha = true;
@@ -212,14 +200,45 @@ export class CupShuffleScene extends SceneContainer {
             if (mesh.name !== "__root__") {  // Skip the root mesh
                 mesh.scaling = new Vector3(3.5, 3.5, 3.5);
                 mesh.position = new Vector3(0, 0, -42.5);
-                
             }
         });
+
+        // Load the mini ice rink
+        const miniRinkResult = await SceneLoader.ImportMeshAsync("", "./meshes/", "minirink.glb", this.scene);
+        
+        // Position and scale the mini rink
+        miniRinkResult.meshes.forEach(mesh => {
+            // Apply transformations to all meshes, including the root
+            mesh.scaling = new Vector3(3.0, 3.0, 3.0);
+            mesh.position = new Vector3(0, 0, -21);
+            mesh.rotation = new Vector3(0, 0, 0);
+            
+            // Ensure the mesh is set up to receive lighting
+            if (mesh.material) {
+                const material = mesh.material as StandardMaterial;
+                material.backFaceCulling = false;
+                material.disableLighting = false;
+            }
+            
+            // If this is the root mesh, make sure it's visible and properly set up
+            if (mesh.name === "__root__") {
+                mesh.isVisible = true;
+                mesh.setEnabled(true);
+            }
+        });
+
+        // Log the meshes for debugging
+        console.log("Mini rink meshes:", miniRinkResult.meshes.map(m => ({
+            name: m.name,
+            position: m.position,
+            scaling: m.scaling,
+            rotation: m.rotation
+        })));
     }
 
     protected setupLights(): void {
-        const ambientLight = new HemisphericLight('ambientLight', new Vector3(5, 1, 11), this.scene);
-        ambientLight.intensity = 0.5;
+        const ambientLight = new HemisphericLight('ambientLight', new Vector3(0, 25, 0), this.scene);
+        ambientLight.intensity = 0.4;
         ambientLight.groundColor = new Color3(0.549, 0.596, .639);
         ambientLight.diffuse = new Color3(0.78, 0.894, 1);
 
@@ -307,9 +326,6 @@ export class CupShuffleScene extends SceneContainer {
         if (this.stateCheckInterval) {
             clearInterval(this.stateCheckInterval);
             this.stateCheckInterval = null;
-        }
-        if (this.uiEntity) {
-            this.uiEntity.dispose();
         }
         super.dispose();
     }

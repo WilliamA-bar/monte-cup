@@ -1,6 +1,5 @@
 import { Engine } from '@babylonjs/core';
 import { SceneManager } from './SceneManager';
-import { AssetManager } from './AssetManager';
 import { BaseHostRoom } from '../../sdk';
 import type { GameState, PlayerState, MessageType, MessagePayloads } from '../../sdk_extension_logic/schema';
 import type { IGameController } from './IGameController';
@@ -13,13 +12,11 @@ export class BabylonGameController implements IGameController {
     private canvas: HTMLCanvasElement;
     private engine: Engine;
     private sceneManager: SceneManager;
-    private assetManager: AssetManager;
     private room: BaseHostRoom<GameState<PlayerState>, PlayerState, MessageType, MessagePayloads>;
 
     constructor(canvas: HTMLCanvasElement, room: BaseHostRoom<GameState<PlayerState>, PlayerState, MessageType, MessagePayloads>) {
         this.canvas = canvas;
         this.engine = new Engine(this.canvas, true);
-        this.assetManager = new AssetManager();
         this.room = room;
 
         this.sceneManager = new SceneManager(this.engine, this.canvas, this.room);
@@ -48,7 +45,7 @@ export class BabylonGameController implements IGameController {
 
     public async initialize(): Promise<void> {
         // Initialize assets and scenes
-        await this.assetManager.initialize();
+        //await this.assetManager.initialize();
         await this.sceneManager.initialize();
     }
 
@@ -56,12 +53,12 @@ export class BabylonGameController implements IGameController {
         await this.initialize();
         
         // Start the render loop
-        this.engine.runRenderLoop(() => {
-            const currentScene = this.sceneManager.getCurrentScene();
-            if (currentScene) {
+        const currentScene = this.sceneManager.getCurrentScene();
+        if (currentScene) {
+            this.engine.runRenderLoop(() => {
                 currentScene.render();
-            }
-        });
+            });
+        }
     }
 
     public async stop(): Promise<void> {

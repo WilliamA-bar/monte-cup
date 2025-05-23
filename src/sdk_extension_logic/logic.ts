@@ -59,11 +59,13 @@ export class GameLogic extends BaseGameLogic<
       this.state.game_phase = GAME_CONSTANTS.PHASES.SETUP;
       this.state.starting_cup = this.generateStartingCup();
       this.state.correct_cup_index = this.state.starting_cup; // Keep both in sync during transition
+      this.state.game_display_message = GAME_CONSTANTS.GAME_DISPLAY_MESSAGES.SETUP;
       await this.adapter.updateState(this.state);
       console.log("[GameLogic] Starting cup:", this.state.starting_cup);
 
       // Display coupon phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.DISPLAY_COUPON;
+      this.state.game_display_message = GAME_CONSTANTS.GAME_DISPLAY_MESSAGES.DISPLAY_COUPON;
       await this.adapter.updateState(this.state);
       console.log("[GameLogic] Displaying coupon");
       await new Promise(resolve => setTimeout(resolve, 4000));
@@ -72,17 +74,27 @@ export class GameLogic extends BaseGameLogic<
       this.state.game_phase = GAME_CONSTANTS.PHASES.SHUFFLE_CUPS;
       [this.state.shuffle_sequence, this.state.starting_cup] = this.createShuffleSequence();
       this.state.correct_cup_index = this.state.starting_cup; // Keep both in sync during transition
+      this.state.game_display_message = GAME_CONSTANTS.GAME_DISPLAY_MESSAGES.SHUFFLE_CUPS;
       await this.adapter.updateState(this.state);
       console.log("[GameLogic] Shuffling cups");
-      await new Promise(resolve => setTimeout(resolve, 7000));
+      const shuffle_duration = this.state.current_shuffle_parameters.shuffle_duration;
+      await new Promise(resolve => setTimeout(resolve, shuffle_duration * 1000));
 
       // Guessing phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.GUESSING_PHASE;
+      this.state.game_display_message = GAME_CONSTANTS.GAME_DISPLAY_MESSAGES.GUESSING_PHASE;
       await this.adapter.updateState(this.state);
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      this.state.guessing_phase_timer = 5;
+
+      for (let i = 0; i < GAME_CONSTANTS.GUESSING_PHASE_DURATION; i++) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        this.state.guessing_phase_timer--;
+        await this.adapter.updateState(this.state);
+      }
 
       // Reveal phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.REVEAL_COUPON;
+      this.state.game_display_message = GAME_CONSTANTS.GAME_DISPLAY_MESSAGES.REVEAL_COUPON;
       // Check player inputs against the correct cup
       this.validateGuesses(this.state.starting_cup);
       await this.adapter.updateState(this.state);
@@ -90,6 +102,8 @@ export class GameLogic extends BaseGameLogic<
 
       // End round phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.END_ROUND;
+      this.state.game_display_message = GAME_CONSTANTS.GAME_DISPLAY_MESSAGES.END_ROUND;
+
       this.state.round++;
 
       // // Update game parameters
@@ -108,7 +122,9 @@ export class GameLogic extends BaseGameLogic<
     }
     
     // Game over
+    this.state.round = 5; // Hardcoded so that the game doesn't display "Round 6"
     this.state.game_phase = GAME_CONSTANTS.PHASES.GAME_OVER;
+    this.state.game_display_message = GAME_CONSTANTS.GAME_DISPLAY_MESSAGES.GAME_OVER;
     await this.adapter.updateState(this.state);
     this.isGameLoopRunning = false;
     console.log("[GameLogic] Game loop ended");
@@ -125,7 +141,7 @@ export class GameLogic extends BaseGameLogic<
     // TODO: Implement this
     // Create pairs of cup indices to shuffle, and then pass it to game state to have it visually represented
     // Have the sequence, and the correct cup index, stored in the state
-    const time_for_shuffling = 7; // seconds
+    const time_for_shuffling = this.state.current_shuffle_parameters.shuffle_duration - 1; // seconds
     const time_per_shuffle = this.state.current_shuffle_parameters.shuffle_pace_base + this.state.current_shuffle_parameters.shuffle_pace_variance;
     //console.log("[GameLogic] Time per shuffle:", time_per_shuffle);
     //console.log("[GameLogic] Time for shuffling:", time_for_shuffling);
