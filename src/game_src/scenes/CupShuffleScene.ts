@@ -234,6 +234,79 @@ export class CupShuffleScene extends SceneContainer {
             scaling: m.scaling,
             rotation: m.rotation
         })));
+
+
+        const sponsor_width = 10;
+        const sponsor_height = 10;
+        // Sponsorships lining the back wall
+        const logo1 = MeshBuilder.CreatePlane('sponsor1', {
+            width: sponsor_width,
+            height: sponsor_height
+        }, this.scene);
+
+        const logo2 = MeshBuilder.CreatePlane('sponsor2', {
+            width: sponsor_width,
+            height: sponsor_height
+        }, this.scene);
+
+        const logo3 = MeshBuilder.CreatePlane('sponsor3', {
+            width: sponsor_width,
+            height: sponsor_height
+        }, this.scene);
+
+        const logo4 = MeshBuilder.CreatePlane('sponsor4', {
+            width: sponsor_width,
+            height: 7
+        }, this.scene);
+
+        const logo5 = MeshBuilder.CreatePlane('sponsor5', {
+            width: sponsor_width,
+            height: 7
+        }, this.scene);
+
+        // Create material for sponsorships
+
+        // Bud Light
+        const sponsorMaterial = new StandardMaterial('sponsorMaterial', this.scene);
+        const sponsorTexture = new Texture('./Bud-Light-Logo.png', this.scene);
+        sponsorTexture.hasAlpha = true;
+        sponsorMaterial.diffuseTexture = sponsorTexture;
+        sponsorMaterial.backFaceCulling = false;
+        sponsorMaterial.specularColor = new Color3(0.5, 0.5, 0.5);
+        sponsorMaterial.specularPower = 1;
+
+        // Yuengling FLIGHT
+        const sponsorMaterial2 = new StandardMaterial('sponsorMaterial2', this.scene);
+        const sponsorTexture2 = new Texture('./yuengling-logo.png', this.scene);
+        sponsorTexture2.hasAlpha = true;
+        sponsorTexture2.wAng = Math.PI; // Flip the texture over Y axis
+        sponsorTexture2.uAng = Math.PI;
+        sponsorMaterial2.diffuseTexture = sponsorTexture2;
+        sponsorMaterial2.backFaceCulling = false;
+        sponsorMaterial2.specularColor = new Color3(0.5, 0.5, 0.5); 
+        sponsorMaterial2.specularPower = 1;
+
+
+        // Apply material to all sponsor meshes
+        logo1.material = sponsorMaterial;
+        logo2.material = sponsorMaterial;
+        logo3.material = sponsorMaterial;
+        logo4.material = sponsorMaterial2;
+        logo5.material = sponsorMaterial2;
+
+        const z_position = -72;
+        const y_position = 4.75;
+        // Position the meshes (you can adjust these values)
+        logo1.position = new Vector3(-50, y_position, z_position);
+        logo2.position = new Vector3(0, y_position, z_position);
+        logo3.position = new Vector3(50, y_position, z_position);
+        logo4.position = new Vector3(-25, y_position, z_position);
+        logo5.position = new Vector3(25, y_position, z_position);
+
+        // Rotate to face forward
+        logo1.rotation.y = Math.PI;
+        logo2.rotation.y = Math.PI;
+        logo3.rotation.y = Math.PI;
     }
 
     protected setupLights(): void {
