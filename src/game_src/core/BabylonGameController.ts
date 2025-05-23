@@ -1,6 +1,5 @@
 import { Engine } from '@babylonjs/core';
 import { SceneManager } from './SceneManager';
-import { AssetManager } from './AssetManager';
 import { BaseHostRoom } from '../../sdk';
 import type { GameState, PlayerState, MessageType, MessagePayloads } from '../../sdk_extension_logic/schema';
 import type { IGameController } from './IGameController';
@@ -13,13 +12,11 @@ export class BabylonGameController implements IGameController {
     private canvas: HTMLCanvasElement;
     private engine: Engine;
     private sceneManager: SceneManager;
-    private assetManager: AssetManager;
     private room: BaseHostRoom<GameState<PlayerState>, PlayerState, MessageType, MessagePayloads>;
 
     constructor(canvas: HTMLCanvasElement, room: BaseHostRoom<GameState<PlayerState>, PlayerState, MessageType, MessagePayloads>) {
         this.canvas = canvas;
         this.engine = new Engine(this.canvas, true);
-        this.assetManager = new AssetManager();
         this.room = room;
 
         this.sceneManager = new SceneManager(this.engine, this.canvas, this.room);
