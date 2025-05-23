@@ -197,7 +197,7 @@ export class CupLineEntityDebugScene extends SceneContainer {
                         }
                         this.isOperationInProgress = true;
                         console.log("Starting guessing phase...");
-                        this.cupLine.guessingPhase(this.room).then(() => {
+                        this.cupLine.guessingPhase().then(() => {
                             console.log("Guessing phase complete");
                             this.isOperationInProgress = false;
                         }).catch(error => {
