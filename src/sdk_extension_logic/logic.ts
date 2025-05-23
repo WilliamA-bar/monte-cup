@@ -49,6 +49,8 @@ export class GameLogic extends BaseGameLogic<
 
   private async gameLoop(): Promise<void> {
     console.log("[GameLogic] Starting game loop");
+    // Wait a couple seconds before starting so loading screen is visible
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // So long as num players not eliminated > 1, continue the game loop
     // Original condition: while (Object.values(this.state.players).filter(player => !player.isEliminated).length > 1 && this.isGameLoopRunning)
