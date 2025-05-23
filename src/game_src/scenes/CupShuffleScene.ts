@@ -10,6 +10,9 @@ export class CupShuffleScene extends SceneContainer {
     private currentPhase: string | null = null;
     private stateCheckInterval: NodeJS.Timeout | null = null;
     private ground: Mesh | null = null;
+    private ground2: Mesh | null = null;
+    private ground3: Mesh | null = null;
+    private ground4: Mesh | null = null;
 
     public async initialize(): Promise<void> {
         await this.beforeStart();
@@ -109,21 +112,97 @@ export class CupShuffleScene extends SceneContainer {
     protected async setupEnvironment(): Promise<void> {
         // Create ground with ice texture
         this.ground = MeshBuilder.CreateGround('ground', {
-            width: 165,
+            width: 150,
             height: 150,
             subdivisions: 1
         }, this.scene);
 
-        const groundMaterial = new StandardMaterial('groundMaterial', this.scene);
-        const iceTexture = new Texture("./textures/iceper.png", this.scene);
+        this.ground2 = MeshBuilder.CreateGround('ground2', {
+            width: 150,
+            height: 150,
+            subdivisions: 1
+        }, this.scene);
+
+        this.ground3 = MeshBuilder.CreateGround('ground3', {
+            width: 150,
+            height: 150,
+            subdivisions: 1
+        }, this.scene);
+
+        this.ground4 = MeshBuilder.CreateGround('ground4', {
+            width: 150,
+            height: 150,
+            subdivisions: 1
+        }, this.scene);
+
+        this.ground2.position.y = 0.01;
+        this.ground3.position.y = 0.02;
+        this.ground4.position.y = 0.03;
+
+        //let mixMaterial = new MixMaterial("mixMaterial", this.scene);
+
+        const base_ice_material = new StandardMaterial('groundMaterial', this.scene);
+        
+        const iceTexture = new Texture("./textures/ice.png", this.scene);
         iceTexture.anisotropicFilteringLevel = 16; 
-        iceTexture.updateSamplingMode(Texture.TRILINEAR_SAMPLINGMODE);
-        iceTexture.uScale = 7;
-        iceTexture.vScale = 7;
-        groundMaterial.diffuseTexture = iceTexture;
-        groundMaterial.specularColor = new Color3(0.1, 0.1, 0.2);
-        groundMaterial.roughness = 0.0;
-        this.ground.material = groundMaterial;
+        iceTexture.uScale = 9;
+        iceTexture.vScale = 9;
+        
+        base_ice_material.diffuseTexture = iceTexture;
+        this.ground.material = base_ice_material;
+
+
+        // Create and setup logo material
+        const ground2Material = new StandardMaterial('ground2Material', this.scene);
+        ground2Material.roughness = 0.9;  // Increase roughness for matte look
+        ground2Material.specularColor = new Color3(0.1, 0.1, 0.1);  // Reduce specular intensity
+        ground2Material.specularPower = 1;  // Lower specular power for more diffuse reflection
+
+        // Stars logo
+        const logoTexture = new Texture("./textures/dallasstarslogo.png", this.scene);
+        logoTexture.hasAlpha = true;
+        logoTexture.anisotropicFilteringLevel = 16;
+        logoTexture.wAng = Math.PI;
+        logoTexture.uScale = 4;  // Make the logo smaller
+        logoTexture.vScale = 4;  // Make the logo smaller
+        logoTexture.uOffset = -1.55; // Center horizontally (0.5 - uScale/2)
+        logoTexture.vOffset = -1.55; // Center vertically (0.5 - vScale/2)
+        logoTexture.wrapU = Texture.CLAMP_ADDRESSMODE;  // Prevent repeating
+        logoTexture.wrapV = Texture.CLAMP_ADDRESSMODE;  // Prevent repeating
+        
+        ground2Material.diffuseTexture = logoTexture;
+        this.ground2.material = ground2Material;
+
+        // Create and setup rink-markings material
+        const ground3Material = new StandardMaterial('ground3Material', this.scene);
+        ground3Material.roughness = 0.9;  // Increase roughness for matte look
+        ground3Material.specularColor = new Color3(0.1, 0.1, 0.1);  // Reduce specular intensity
+        ground3Material.specularPower = 1;  // Lower specular power for more diffuse reflection
+        
+
+        // Hockey rink markings
+        const rinkMarkings = new Texture("./textures/hockey-rink-markings.png", this.scene);
+        rinkMarkings.anisotropicFilteringLevel = 16; 
+        rinkMarkings.uScale = 1;
+        rinkMarkings.vScale = 1;
+        rinkMarkings.hasAlpha = true;
+        
+        ground3Material.diffuseTexture = rinkMarkings;
+        this.ground3.material = ground3Material;
+
+        // Transparent ice
+        const ground4Material = new StandardMaterial('ground4Material', this.scene);
+        ground4Material.diffuseTexture = iceTexture;
+        const ice2Texture = new Texture("./textures/ice.png", this.scene);
+        ice2Texture.anisotropicFilteringLevel = 16; 
+        ice2Texture.updateSamplingMode(Texture.LINEAR_LINEAR_MIPLINEAR);
+        ice2Texture.uScale = 9;
+        ice2Texture.vScale = 9;
+        ice2Texture.hasAlpha = true;
+        ground4Material.alpha = 0.6;
+                
+        ground4Material.diffuseTexture = ice2Texture;
+        this.ground4.material = ground4Material;
 
         // Load the rink model - only load once
         const result = await SceneLoader.ImportMeshAsync("", "./meshes/", "dallasrink.glb", this.scene);
@@ -132,7 +211,7 @@ export class CupShuffleScene extends SceneContainer {
         result.meshes.forEach(mesh => {
             if (mesh.name !== "__root__") {  // Skip the root mesh
                 mesh.scaling = new Vector3(3.5, 3.5, 3.5);
-                mesh.position = new Vector3(0, 0, -40);
+                mesh.position = new Vector3(0, 0, -42.5);
                 
             }
         });
@@ -140,16 +219,17 @@ export class CupShuffleScene extends SceneContainer {
 
     protected setupLights(): void {
         const ambientLight = new HemisphericLight('ambientLight', new Vector3(5, 1, 11), this.scene);
-        ambientLight.intensity = 0.3;
+        ambientLight.intensity = 0.5;
         ambientLight.groundColor = new Color3(0.549, 0.596, .639);
         ambientLight.diffuse = new Color3(0.78, 0.894, 1);
 
-        const spotLight = new PointLight('spotLight', new Vector3(0, 8, -10), this.scene);
+        // Light behind the helmets
+        const spotLight = new PointLight('spotLight', new Vector3(0, 8, -23), this.scene);
         spotLight.intensity = 0.9;
         spotLight.diffuse = new Color3(.933, 0.969, 1);
         spotLight.specular = new Color3(.933, 0.969, 1);
-        spotLight.radius = 1.5;
-        spotLight.range = 17;
+        spotLight.radius = 4.5;
+        spotLight.range = 23;
 
         const topLight = new SpotLight('topLight', new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 1, this.scene);
         topLight.intensity = 0.7;
