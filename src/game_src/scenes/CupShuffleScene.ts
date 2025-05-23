@@ -1,10 +1,8 @@
-import { Vector3, HemisphericLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera, Texture,     LensRenderingPipeline, ShadowGenerator, Mesh, SceneLoader } from '@babylonjs/core';
+import { Vector3, HemisphericLight, SpotLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera, Texture,     LensRenderingPipeline, ShadowGenerator, Mesh, SceneLoader } from '@babylonjs/core';
 import { SceneContainer } from '../core/SceneContainer';
 import { CupLineEntity } from '../components/CupLineEntity';
 import { UIEntity } from '../components/UIEntity';
 import { GameState, PlayerState, GAME_CONSTANTS } from '../../sdk_extension_logic/schema';
-import { BaseHostRoom } from '../../sdk';
-import type { MessageType, MessagePayloads } from '../../sdk_extension_logic/schema';
 export class CupShuffleScene extends SceneContainer {
     private mainCamera!: ArcRotateCamera;
     private cupLine: CupLineEntity | null = null;
@@ -19,49 +17,49 @@ export class CupShuffleScene extends SceneContainer {
         
         // Check state every second
         this.stateCheckInterval = setInterval(() => {
-            this.runActionsBasedOnState(this.room).catch(console.error);
+            this.runActionsBasedOnState().catch(console.error);
         }, 1000);
     }
 
-    private async runActionsBasedOnState(room: BaseHostRoom<GameState<PlayerState>, PlayerState, MessageType, MessagePayloads>): Promise<void> {
+    private async runActionsBasedOnState(): Promise<void> {
         //console.log("[Client] Running actions based on state");
         if (!this.uiEntity) return;
         
         // Only process if this is a new phase
-        if (this.currentPhase === room.state.game_phase) {
+        if (this.currentPhase === this.room.state.game_phase) {
             //console.log("[Client] Same phase, skipping");
             // Wait for 1 second before running the next action
             await new Promise(resolve => setTimeout(resolve, 1000));
             return;
         }
 
-        this.currentPhase = room.state.game_phase;
+        this.currentPhase = this.room.state.game_phase;
         
-        switch (room.state.game_phase) {
+        switch (this.room.state.game_phase) {
             case GAME_CONSTANTS.PHASES.SETUP:
                 console.log("Awaiting setup");
                 break;
             case GAME_CONSTANTS.PHASES.DISPLAY_COUPON:
                 console.log("[Client] Entered phase: DisplayCoupon");
-                this.uiEntity.setMessage(room);
+                this.uiEntity.setMessage(this.room);
                 await this.displayCouponPhase();
                 console.log("[Client] Exited phase: DisplayCoupon");
                 break;
             case GAME_CONSTANTS.PHASES.SHUFFLE_CUPS:
                 console.log("[Client] Entered phase: ShuffleCups");
-                this.uiEntity.setMessage(room);
+                this.uiEntity.setMessage(this.room);
                 await this.shuffleCups();
                 console.log("[Client] Exited phase: ShuffleCups");
                 break;
             case GAME_CONSTANTS.PHASES.GUESSING_PHASE:
                 console.log("[Client] Entered phase: GuessingPhase");
-                this.uiEntity.setMessage(room);
+                this.uiEntity.setMessage(this.room);
                 await this.guessingPhase();
                 console.log("[Client] Exited phase: GuessingPhase");
                 break;
             case GAME_CONSTANTS.PHASES.REVEAL_COUPON:
                 console.log("[Client] Entered phase: RevealCoupon");
-                this.uiEntity.setMessage(room);
+                this.uiEntity.setMessage(this.room);
                 await this.revealCoupon();
                 console.log("[Client] Exited phase: RevealCoupon");
                 break;
@@ -72,7 +70,7 @@ export class CupShuffleScene extends SceneContainer {
                 break;
             case GAME_CONSTANTS.PHASES.GAME_OVER:
                 console.log("[Client] Entered phase: GameOver");
-                this.uiEntity.setMessage(room);
+                await this.uiEntity.setMessage(this.room);
                 console.log("[Client] Exited phase: GameOver");
                 break;
             default:
@@ -142,7 +140,7 @@ export class CupShuffleScene extends SceneContainer {
 
     protected setupLights(): void {
         const ambientLight = new HemisphericLight('ambientLight', new Vector3(5, 1, 11), this.scene);
-        ambientLight.intensity = 0.4;
+        ambientLight.intensity = 0.3;
         ambientLight.groundColor = new Color3(0.549, 0.596, .639);
         ambientLight.diffuse = new Color3(0.78, 0.894, 1);
 
@@ -153,8 +151,24 @@ export class CupShuffleScene extends SceneContainer {
         spotLight.radius = 1.5;
         spotLight.range = 17;
 
-        
+        const topLight = new SpotLight('topLight', new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 1, this.scene);
+        topLight.intensity = 0.7;
+        topLight.diffuse = new Color3(0.9, 0.8, 0.6);
+        topLight.specular = new Color3(0.9, 0.8, 0.6);
+        topLight.radius = 4;
+        topLight.range = 12;
 
+
+        // Array of lights that light up the back of the rink 
+        for (let i = 0; i < 6; i++) {
+            const light = new PointLight('backLight', new Vector3(-50 + (i * 20), 10, -50), this.scene);
+            light.intensity = 0.6;
+            light.diffuse = new Color3(0.859, 0.91, 0.961);
+            light.specular = new Color3(0.9, 0.8, 0.6);
+            light.radius = 0.1;
+            light.range = 18;
+        }
+        
         const frontLight = new PointLight('frontLight', new Vector3(0, 5, 8), this.scene);
         frontLight.intensity = 0.7;
         frontLight.diffuse = new Color3(0.9, 0.8, 0.6);
@@ -194,7 +208,7 @@ export class CupShuffleScene extends SceneContainer {
 
     protected async guessingPhase(): Promise<void> {
         if (!this.cupLine) return;
-        await this.cupLine.guessingPhase(this.room);
+        await this.cupLine.guessingPhase();
     }
 
 
@@ -205,6 +219,7 @@ export class CupShuffleScene extends SceneContainer {
 
     protected async resetRound(): Promise<void> {
         if (!this.cupLine) return;
+        //await this.cupLine.updateShuffleParameters();
         await this.cupLine.resetLine();
     }
 

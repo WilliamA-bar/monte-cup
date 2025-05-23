@@ -54,7 +54,7 @@ export class PlayerChoiceEntity {
 
     public removePlayer(player: PlayerState): void {
         if (this.number_of_players > 0) {
-            console.log("Removing player", player);
+            //console.log("Removing player", player);
             this.players = this.players.filter(p => p !== player);
             this.deleteDecisionMesh();
             this.number_of_players--;

@@ -52,18 +52,8 @@ export class GameLogic extends BaseGameLogic<
 
     // So long as num players not eliminated > 1, continue the game loop
     // Original condition: while (Object.values(this.state.players).filter(player => !player.isEliminated).length > 1 && this.isGameLoopRunning)
-    while (this.state.round <= 3 && this.isGameLoopRunning) {
+    while (this.state.round <= 5 && this.isGameLoopRunning) {
       console.log("[GameLogic] Game loop iteration");
-      // for (let i = 0; i < 50000; i++) {
-      //   const helmet = this.state.world_entities.hemlet;
-      //   const pos = helmet.getPosition();
-      //   helmet.setPosition({ 
-      //       x: pos.x + 0, 
-      //       y: pos.y + 0.5, 
-      //       z: pos.z + 0.5 
-      //   });
-      //   await this.adapter.updateState(this.state);
-      // }
       
       // Set phase to setup and generate starting cup
       this.state.game_phase = GAME_CONSTANTS.PHASES.SETUP;
@@ -101,6 +91,18 @@ export class GameLogic extends BaseGameLogic<
       // End round phase
       this.state.game_phase = GAME_CONSTANTS.PHASES.END_ROUND;
       this.state.round++;
+
+      // // Update game parameters
+      // if (this.state.round === 3) {
+      //   this.state.number_of_cups = 4;
+      // }
+      // else if (this.state.round === 5) {
+      //   this.state.number_of_cups = 5;
+      // }
+      this.state.current_shuffle_parameters.shuffle_pace_base = Math.max(0.01, this.state.current_shuffle_parameters.shuffle_pace_base - GAME_CONSTANTS.RAMP_UP_PARAMETER_INCREASES.SHUFFLE_PACE_BASE);
+      this.state.current_shuffle_parameters.shuffle_pace_variance = Math.max(0.01, this.state.current_shuffle_parameters.shuffle_pace_variance - GAME_CONSTANTS.RAMP_UP_PARAMETER_INCREASES.SHUFFLE_PACE_VARIANCE);
+      
+      
       await this.adapter.updateState(this.state);
       await new Promise(resolve => setTimeout(resolve, 500));
     }
@@ -123,12 +125,18 @@ export class GameLogic extends BaseGameLogic<
     // TODO: Implement this
     // Create pairs of cup indices to shuffle, and then pass it to game state to have it visually represented
     // Have the sequence, and the correct cup index, stored in the state
+    const time_for_shuffling = 7; // seconds
+    const time_per_shuffle = this.state.current_shuffle_parameters.shuffle_pace_base + this.state.current_shuffle_parameters.shuffle_pace_variance;
+    //console.log("[GameLogic] Time per shuffle:", time_per_shuffle);
+    //console.log("[GameLogic] Time for shuffling:", time_for_shuffling);
+    const num_shuffles = Math.floor(time_for_shuffling / time_per_shuffle);
 
+    //console.log("[GameLogic] Number of shuffles:", num_shuffles);
 
     const lower_bound = 0;
     const upper_bound = this.state.number_of_cups - 1;
     const sequence: number[][] = [];
-    for (let i = 0; i < 13; i++) {
+    for (let i = 0; i < num_shuffles; i++) {
       const first_index = Math.floor(Math.random() * (upper_bound - lower_bound + 1)) + lower_bound;
       let second_index = Math.floor(Math.random() * (upper_bound - lower_bound + 1)) + lower_bound;
 
