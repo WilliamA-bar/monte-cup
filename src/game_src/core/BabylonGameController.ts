@@ -48,7 +48,7 @@ export class BabylonGameController implements IGameController {
 
     public async initialize(): Promise<void> {
         // Initialize assets and scenes
-        await this.assetManager.initialize();
+        //await this.assetManager.initialize();
         await this.sceneManager.initialize();
     }
 
@@ -56,12 +56,12 @@ export class BabylonGameController implements IGameController {
         await this.initialize();
         
         // Start the render loop
-        this.engine.runRenderLoop(() => {
-            const currentScene = this.sceneManager.getCurrentScene();
-            if (currentScene) {
+        const currentScene = this.sceneManager.getCurrentScene();
+        if (currentScene) {
+            this.engine.runRenderLoop(() => {
                 currentScene.render();
-            }
-        });
+            });
+        }
     }
 
     public async stop(): Promise<void> {

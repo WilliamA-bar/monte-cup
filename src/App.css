@@ -11,28 +11,6 @@ body {
   overflow: hidden;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
@@ -51,10 +29,155 @@ body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
 #renderCanvas {
     width: 100%;
     height: 100%;
     touch-action: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+@keyframes pulse {
+    0% { color: white; }
+    50% { color: #ff4444; }
+    100% { color: white; }
+}
+
+.timer-container {
+    position: absolute;
+    bottom: 60px;
+    right: 60px;
+    z-index: 1000;
+    background: linear-gradient(to bottom, #333333, #000000);
+    color: white;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 80px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    pointer-events: auto;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.timer-container.pulse {
+    animation: pulse 0.3s ease-in-out;
+}
+
+.round-container {
+    position: absolute;
+    bottom: 60px;
+    left: 60px;
+    z-index: 1000;
+    background: linear-gradient(to bottom, #333333, #000000);
+    color: white;
+    min-width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 56px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    pointer-events: auto;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 0 60px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.message-wrapper {
+    position: absolute;
+    bottom: 60px;
+    left: 60px;
+    width: calc(100% - 120px);
+    height: 120px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.message-container {
+    position: absolute;
+    bottom: 0;
+    left: 320px;
+    z-index: 999;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: white;
+    min-width: 200px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 48px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    pointer-events: auto;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 0 60px;
+    text-align: center;
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.message-container.visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.logo-container {
+    position: absolute;
+    top: 60px;
+    left: 40px;
+    z-index: 1000;
+    pointer-events: auto;
+}
+
+.logo-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 42px;
+}
+
+.logo-image {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.beta-badge {
+    position: absolute;
+    right: -16px;
+    bottom: -4px;
+    border-radius: 4px;
+    background-color: #a18d52;
+    padding: 2px 4px;
+}
+
+.beta-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
 }

@@ -125,18 +125,27 @@ export const GAME_CONSTANTS = {
     END_ROUND: "endRound",
     GAME_OVER: "gameOver"
   },
+  GAME_DISPLAY_MESSAGES: {
+    SETUP: "",
+    DISPLAY_COUPON: "Remember the puck",
+    SHUFFLE_CUPS: "",
+    GUESSING_PHASE: "Take a guess!",
+    REVEAL_COUPON: "Round complete",
+    END_ROUND: "Round complete",
+    GAME_OVER: "GAME OVER"
+  },
   ROUND_ONE_SHUFFLE_PARAMETERS: {
     NUMBER_OF_CUPS: 3,
     SHUFFLE_DURATION: 10, // seconds
-    SHUFFLE_PACE_BASE: 0.44, // seconds
+    SHUFFLE_PACE_BASE: 0.5, // seconds
     SHUFFLE_PACE_VARIANCE: 0.25, // seconds
   },
   RAMP_UP_AFTER_THIS_MANY_ROUNDS: 2,
   RAMP_UP_PARAMETER_INCREASES: {
     INCREASE_IN_CUPS: 1,
-    SHUFFLE_DURATION: 10, // seconds
-    SHUFFLE_PACE_BASE: 0.05, // seconds
-    SHUFFLE_PACE_VARIANCE: 0.06, // seconds
+    SHUFFLE_DURATION: 8, // seconds
+    SHUFFLE_PACE_BASE: 0.04, // seconds
+    SHUFFLE_PACE_VARIANCE: 0.03, // seconds
   },
   MAXIMUM_RAMP_UPS: 6,
   GUESSING_PHASE_DURATION: 5, // seconds
@@ -181,6 +190,7 @@ export const baseInitialState: GameState<PlayerState> = {
   correct_cup_index: 0,      // Start with prize under first cup
   shuffle_sequence: [],     // Empty shuffle sequence to start
   last_shuffle_time: undefined,  // No shuffles yet
+  game_display_message: "",
   current_shuffle_parameters: {
     number_of_cups: GAME_CONSTANTS.ROUND_ONE_SHUFFLE_PARAMETERS.NUMBER_OF_CUPS,
     shuffle_duration: GAME_CONSTANTS.ROUND_ONE_SHUFFLE_PARAMETERS.SHUFFLE_DURATION,
