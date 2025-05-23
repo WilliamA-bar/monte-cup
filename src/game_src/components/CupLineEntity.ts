@@ -10,13 +10,10 @@ export class CupLineEntity {
 
     private cups: CupEntity[];
     private choice_entities: PlayerChoiceEntity[];
+    private cup_shuffle_positions: Vector3[];
     
 
     public position: Vector3;
-    public number_of_cups: number;
-    public shuffle_duration: number;
-    public shuffle_pace_base: number;
-    public shuffle_pace_variance: number;
     public line_length: number;
 
     private start_position: Vector3;
@@ -25,14 +22,11 @@ export class CupLineEntity {
     constructor(scene: Scene, position: Vector3, room: BaseHostRoom<GameState<PlayerState>, PlayerState, MessageType, MessagePayloads>) {
         this.scene = scene;
         this.position = position;
-        this.number_of_cups = room.state.number_of_cups;
-        this.shuffle_duration = room.state.shuffle_duration;
-        this.shuffle_pace_base = room.state.shuffle_pace_base;
-        this.shuffle_pace_variance = room.state.shuffle_pace_variance;
         this.line_length = 9;
         this.start_position = new Vector3(-this.line_length / 2, 0.75, 0);
         this.cups = [];
         this.choice_entities = [];
+        this.cup_shuffle_positions = [];
         this.room = room;
     }
 
@@ -40,13 +34,14 @@ export class CupLineEntity {
         // Place the cups in the line
 
         this.cups = [];
-        const cup_spacing = this.line_length / (this.number_of_cups - 1);
+        const cup_spacing = this.line_length / (this.room.state.current_shuffle_parameters.number_of_cups - 1);
         
         // Create all cups first
-        for (let i = 0; i < this.number_of_cups; i++) {
+        for (let i = 0; i < this.room.state.current_shuffle_parameters.number_of_cups; i++) {
             const position = this.start_position.clone().add(new Vector3(cup_spacing * i, 0, 0));
             const cup = new CupEntity(this.scene, position, 'cup' + i, i);
             this.cups.push(cup);
+            this.cup_shuffle_positions.push(position.clone());
         }
 
         // Initialize all cups in parallel
@@ -58,9 +53,9 @@ export class CupLineEntity {
         await this.cups[this.room.state.starting_cup].revealContents();
     }
 
-    public async guessingPhase(room: BaseHostRoom<GameState<PlayerState>, PlayerState, MessageType, MessagePayloads>): Promise<void> {
+    public async guessingPhase(): Promise<void> {
         // Enable all choice entities
-        for (let i = 0; i < this.number_of_cups; i++) {
+        for (let i = 0; i < this.room.state.current_shuffle_parameters.number_of_cups; i++) {
             //this.choice_entities[i].enable(); For the dallas stars demo, choice entities are not enabled
         }
 
@@ -75,11 +70,11 @@ export class CupLineEntity {
 
                 if (elapsedTime < votingDuration) {
                     // Update votes every frame
-                    await this.readVotes(room.state.players); // Empty array for now, will be populated later
+                    await this.readVotes(this.room.state.players); // Empty array for now, will be populated later
                     requestAnimationFrame(() => updateVotes());
                 } else {
                     // Final vote update
-                    await this.readVotes(room.state.players);
+                    await this.readVotes(this.room.state.players);
                     resolve();
                 }
             };
@@ -90,25 +85,9 @@ export class CupLineEntity {
     }
 
     public async resetLine(): Promise<void> {
-        for (let i = 0; i < this.number_of_cups; i++) {
-            this.cups[i].setOpenable(false);
-        }
 
         // Clear choice entities
         await this.clearChoiceEntities();
-    }
-
-    public async changeCupLineParameters(new_parameters: {numberOfCups: number, shuffleDuration: number, shufflePaceBase: number, shufflePaceVariance: number}): Promise<void> {
-        this.number_of_cups = new_parameters.numberOfCups;
-        this.shuffle_duration = new_parameters.shuffleDuration;
-        this.shuffle_pace_base = new_parameters.shufflePaceBase;
-        this.shuffle_pace_variance = new_parameters.shufflePaceVariance;
-
-        // Reset cups and choice entities
-        await this.resetLine();
-
-        // Update the correct cup index'
-        this.room.state.starting_cup = Math.floor(Math.random() * this.number_of_cups);
     }
 
     public async shuffleLinePhase(): Promise<void> {
@@ -137,7 +116,6 @@ export class CupLineEntity {
                     continue;
                 }
                 
-                console.log(`Shuffling cups at indices: ${index1}, ${index2}`);
                 const cup1 = this.cups[index1];
                 const cup2 = this.cups[index2];
                 
@@ -146,33 +124,51 @@ export class CupLineEntity {
                     continue;
                 }
                 
-                await this.shuffleCupPair(cup1, cup2, this.cups);
+                await this.shuffleCupPair(cup1, cup2);
             }
         } catch (error) {
             console.error("Error during cup shuffling:", error);
         }
     }
 
-    private async shuffleCupPair(cup1: CupEntity, cup2: CupEntity, cup_array: CupEntity[]): Promise<void> {
+    public async updateShuffleParameters(): Promise<void> {
+        // First, store the new parameters
+
+
+        // Delete all cups, and reinitialize them
+        for (let i = 0; i < this.cups.length; i++) {
+            this.cups[i].dispose();
+        }
+        this.cups = [];
+        await this.initialize();
+        
+    }
+
+
+    private async shuffleCupPair(cup1: CupEntity, cup2: CupEntity): Promise<void> {
         try {
-            const cup1_position = cup1.getPosition();
-            const cup2_position = cup2.getPosition();
-                
+            // Grab cup indexes
+            const index1 = this.cups.indexOf(cup1);
+            const index2 = this.cups.indexOf(cup2);
+
+            const shuffle_target_position1 = this.cup_shuffle_positions[index2];
+            const shuffle_target_position2 = this.cup_shuffle_positions[index1];
+
+
             // Use Promise.all to maintain scene rendering and move cups simultaneously
             const shuffle_pace = this.room.state.current_shuffle_parameters.shuffle_pace_base + 
                 Math.random() * this.room.state.current_shuffle_parameters.shuffle_pace_variance;
             
             await Promise.all([
-                cup1.shuffleTo(cup2_position, shuffle_pace, true),
-                cup2.shuffleTo(cup1_position, shuffle_pace, false)
+                cup1.shuffleTo(shuffle_target_position1, shuffle_pace, true),
+                cup2.shuffleTo(shuffle_target_position2, shuffle_pace, false)
             ]);
             
             // Swap cups in the array
-            const index1 = cup_array.indexOf(cup1);
-            const index2 = cup_array.indexOf(cup2);
+            
             
             // Swap the cups in the array
-            [cup_array[index1], cup_array[index2]] = [cup_array[index2], cup_array[index1]];
+            [this.cups[index1], this.cups[index2]] = [this.cups[index2], this.cups[index1]];
         } catch (error) {
             console.error("Error in shuffleCupPair:", error);
         }

@@ -53,6 +53,8 @@ export class CupEntity {
     }
 
     private updateMeshes(): void {
+
+        if (!this.mesh) return;
         // Keep the helmet (mesh) stationary
         this.mesh.position = this.position.clone();
         this.mesh.position.y = 1; // Keep helmet at ground level
@@ -81,13 +83,6 @@ export class CupEntity {
     }
 
     /**
-     * Sets whether this cup can be opened by clicking.
-     */
-    public setOpenable(isOpenable: boolean): void {
-        this.isOpenable = isOpenable;
-    }
-
-    /**
      * Animates the cup to a new position with an arcing motion.
      * @param targetPosition The position to move to
      * @param duration Time in seconds for the movement
@@ -98,7 +93,7 @@ export class CupEntity {
             const startPosition = this.position.clone();
             const endPosition = targetPosition.clone();
             endPosition.y = startPosition.y;
-            
+
             // Calculate arc parameters
             const radius = Vector3.Distance(startPosition, endPosition) / 2;
             
@@ -108,12 +103,16 @@ export class CupEntity {
                 ? new Vector3(direction.z, 0, direction.x)
                 : new Vector3(-direction.z, 0, direction.x);
 
-            const startTime = Date.now();
+            const shuffle_start_time = performance.now();
+            
+            //console.log("Animation Start - startTime:", shuffle_start_time);
             
             const updatePosition = () => {
-                const currentTime = Date.now();
-                const elapsed = (currentTime - startTime) / 1000; // Convert to seconds
+                const shuffle_current_time = performance.now();
+                const elapsed = (shuffle_current_time - shuffle_start_time) / 1000; // Convert to seconds
                 const progress = Math.min(elapsed / duration, 1);
+                
+                //console.log("Timing Debug for cup ", this.id, " - currentTime:", shuffle_current_time, "startTime:", shuffle_start_time, "elapsed:", elapsed, "progress:", progress);
                 
                 // Quadratic ease out
                 const easedProgress = 1 - (1 - progress) * (1 - progress);
@@ -124,12 +123,13 @@ export class CupEntity {
                 const newPos = linearPos.add(perpendicular.scale(sideOffset));
                 newPos.y = startPosition.y;
                 
-                this.position = newPos;
+                this.position = newPos.clone();
                 
                 if (progress < 1) {
                     setTimeout(updatePosition, 16);
                 } else {
-                    this.position = endPosition;
+                    this.position = endPosition.clone();
+                    //console.log("Animation End - endTime:", performance.now());
                     resolve();
                 }
             };
@@ -214,13 +214,15 @@ export class CupEntity {
      */
     private createCouponMesh(name: string): Mesh {
         const puck = MeshBuilder.CreateCylinder(name, {
-            height: 0.2,
+            height: 0.24,
             diameter: 0.8,
-            tessellation: 20
+            tessellation: 20,
+            
         }, this.scene);
         
         const material = new StandardMaterial(name + '_material', this.scene);
         material.diffuseColor = new Color3(0.2, 0.2, 0.2); // Dark gray for puck
+        material.roughness = 0.8;
         puck.material = material;
         
         return puck;
@@ -277,7 +279,7 @@ export class CupEntity {
             // If the cup is lifted more than 1 unit, show the coupon
             this.isOpened = this.position.y > 0.76;
 
-            console.log("Position", this.position," isOpened", this.isOpened);
+            //console.log("Position", this.position," isOpened", this.isOpened);
             
             if (progress < 1) {
                 setTimeout(updatePosition, 16);
