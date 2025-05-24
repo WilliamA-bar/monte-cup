@@ -1,4 +1,4 @@
-import { Vector3, HemisphericLight, SpotLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera, Texture,     LensRenderingPipeline, ShadowGenerator, Mesh, SceneLoader } from '@babylonjs/core';
+import { Vector3, HemisphericLight, SpotLight, MeshBuilder, StandardMaterial, Color3, PointLight, Color4, ArcRotateCamera, Texture, ShadowGenerator, Mesh, SceneLoader } from '@babylonjs/core';
 import { SceneContainer } from '../core/SceneContainer';
 import { CupLineEntity } from '../components/CupLineEntity';
 import { GameState, PlayerState, GAME_CONSTANTS } from '../../sdk_extension_logic/schema';
@@ -15,6 +15,7 @@ export class CupShuffleScene extends SceneContainer {
     public async initialize(): Promise<void> {
         await this.beforeStart();
         await this.setupCups();
+        this.setupCamera();
         
         // Check state every second
         this.stateCheckInterval = setInterval(() => {
@@ -73,7 +74,6 @@ export class CupShuffleScene extends SceneContainer {
 
     public async beforeStart(): Promise<void> {
         this.scene.clearColor = new Color4(0.05, 0.05, 0.10, 1);
-        this.setupCamera();
         await this.setupEnvironment();
         this.setupLights();
     }
@@ -91,10 +91,10 @@ export class CupShuffleScene extends SceneContainer {
         //this.camera.attachControl(this.canvas, true);
         //this.mainCamera.inputs.clear();
 
-        const parameters = {
+        // const parameters = {
             
-        };
-        new LensRenderingPipeline('lensEffects', parameters, this.scene, 1.0, [this.camera]);
+        // };
+        // new LensRenderingPipeline('lensEffects', parameters, this.scene, 1.0, [this.camera]);
     }
 
     protected async setupEnvironment(): Promise<void> {
