@@ -45,7 +45,7 @@ export class BabylonGameController implements IGameController {
 
     public async initialize(): Promise<void> {
         // Initialize assets and scenes
-        //await this.assetManager.initialize();
+        
         await this.sceneManager.initialize();
     }
 

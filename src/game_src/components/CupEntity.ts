@@ -148,6 +148,8 @@ export class CupEntity {
         setTimeout(() => {
             this.lift(-2.5);
         }, 2500);
+        // Ensure puck is back in place
+        
         
     }
 
@@ -287,6 +289,7 @@ export class CupEntity {
         };
         
         updatePosition();
+        
     }
 
 }
