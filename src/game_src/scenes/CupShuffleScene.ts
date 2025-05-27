@@ -151,10 +151,10 @@ export class CupShuffleScene extends SceneContainer {
         logoTexture.hasAlpha = true;
         logoTexture.anisotropicFilteringLevel = 16;
         logoTexture.wAng = Math.PI;
-        logoTexture.uScale = 4;  // Make the logo smaller
-        logoTexture.vScale = 4;  // Make the logo smaller
-        logoTexture.uOffset = -1.55; // Center horizontally (0.5 - uScale/2)
-        logoTexture.vOffset = -1.55; // Center vertically (0.5 - vScale/2)
+        logoTexture.uScale = 3;  // Make the logo smaller
+        logoTexture.vScale = 3;  // Make the logo smaller
+        logoTexture.uOffset = -1.07; // Center horizontally (0.5 - uScale/2)
+        logoTexture.vOffset = -1.05; // Center vertically (0.5 - vScale/2)
         logoTexture.wrapU = Texture.CLAMP_ADDRESSMODE;  // Prevent repeating
         logoTexture.wrapV = Texture.CLAMP_ADDRESSMODE;  // Prevent repeating
         

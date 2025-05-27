@@ -1,5 +1,5 @@
 
-import logoWhite from "../assets/logo-white.svg";
+import logoWhite from "../assets/bblogo.png";
 import drakesLogo from "../assets/drakes-hollywood-logo.png";
 
 interface BBLogoProps {
